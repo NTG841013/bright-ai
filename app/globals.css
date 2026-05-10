@@ -51,6 +51,11 @@
   --color-state-warning: var(--state-warning);
 }
 
+@keyframes pulse-brand {
+  0%, 100% { color: var(--text-primary); }
+  50% { color: var(--accent-primary); }
+}
+
 html {
   color-scheme: dark;
 }

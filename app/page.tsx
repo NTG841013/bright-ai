@@ -1,8 +1,11 @@
-export default function Home() {
-  return (
+import { auth } from "@clerk/nextjs/server"
+import { redirect } from "next/navigation"
 
-      <div className="flex h-screen items-center justify-center">
-      <p>Bright AI</p>
-    </div>
-  );
+export default async function Home() {
+  const { userId } = await auth()
+  if (userId) {
+    redirect("/editor")
+  } else {
+    redirect("/sign-in")
+  }
 }
