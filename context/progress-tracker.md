@@ -8,19 +8,20 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Goal
 
-- Define the immediate implementation goal here.
+- Implement 02-editor.md: Editor Navbar and Project Sidebar shell components.
 
 ## Completed
 
 - Design system (01-design-system.md): shadcn/ui components (Button, Card, Dialog, Input, Tabs, Textarea, ScrollArea, Tooltip), lucide-react, lib/utils.ts cn() helper, globals.css dark theme variables — all installed and build verified.
+- Editor chrome (02-editor.md): EditorNavbar (fixed top bar, sidebar toggle with PanelLeftOpen/PanelLeftClose) and ProjectSidebar (floating overlay, Tabs for My Projects/Shared, New Project button) — compiled and type-checked.
 
 ## In Progress
 
-- None yet.
+- None.
 
 ## Next Up
 
-- Add the next planned feature unit here.
+- 03: next planned feature unit.
 
 ## Open Questions
 
