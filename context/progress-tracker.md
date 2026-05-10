@@ -34,6 +34,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Session Notes
 
+- Updated clerk-nextjs-patterns evals to explicitly mention proxy.ts and specific route protection requirements.
 - shadcn uses base-nova style variant with base-ui primitives (not radix).
 - Tailwind v4 @theme inline used to map CSS vars to utility color tokens.
 - lib/utils.ts cn() uses clsx + tailwind-merge (both already in dependencies).
