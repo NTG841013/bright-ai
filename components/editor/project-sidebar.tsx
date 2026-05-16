@@ -135,7 +135,7 @@ function ProjectItem({ project, onRename, onDelete, showActions }: ProjectItemPr
     <div className="group/item flex items-center gap-1 rounded-xl px-2 py-2 hover:bg-bg-elevated">
       <span className="flex-1 truncate text-sm text-text-primary">{project.name}</span>
       {showActions && (
-        <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover/item:opacity-100">
+        <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover/item:opacity-100 group-focus-within/item:opacity-100">
           <Button
             variant="ghost"
             size="icon-sm"
