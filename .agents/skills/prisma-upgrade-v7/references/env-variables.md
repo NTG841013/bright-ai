@@ -73,7 +73,7 @@ import { config } from 'dotenv'
 import path from 'path'
 
 // Load specific .env file
-config({ path: path.join(__dirname, '.env.local') })
+config({ path: path.join(import.meta.dirname, '.env.local') })
 
 import { defineConfig, env } from 'prisma/config'
 

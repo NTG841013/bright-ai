@@ -32,7 +32,7 @@ MongoDB should not follow this path. There is no published MongoDB `@prisma/adap
 ### PostgreSQL
 
 ```bash
-npm install @prisma/adapter-pg
+npm install @prisma/adapter-pg pg
 ```
 
 ### MySQL

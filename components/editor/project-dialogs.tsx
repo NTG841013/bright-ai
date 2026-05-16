@@ -60,6 +60,7 @@ export function ProjectDialogs({ actions }: ProjectDialogsProps) {
     projectName, 
     setProjectName, 
     close,
+    error,
     isLoading,
     suffix,
     handleCreate,
@@ -76,6 +77,7 @@ export function ProjectDialogs({ actions }: ProjectDialogsProps) {
         onClose={close}
         onSubmit={handleCreate}
         isLoading={isLoading}
+        error={error}
         suffix={suffix}
       />
       <RenameProjectDialog
@@ -86,6 +88,7 @@ export function ProjectDialogs({ actions }: ProjectDialogsProps) {
         onClose={close}
         onSubmit={handleRename}
         isLoading={isLoading}
+        error={error}
       />
       <DeleteProjectDialog
         open={dialogType === "delete"}
@@ -93,6 +96,7 @@ export function ProjectDialogs({ actions }: ProjectDialogsProps) {
         onClose={close}
         onSubmit={handleDelete}
         isLoading={isLoading}
+        error={error}
       />
     </>
   )
@@ -105,6 +109,7 @@ interface CreateProjectDialogProps {
   onClose: () => void
   onSubmit: () => void
   isLoading: boolean
+  error: string | null
   suffix: string
 }
 
@@ -115,6 +120,7 @@ function CreateProjectDialog({
   onClose,
   onSubmit,
   isLoading,
+  error,
   suffix,
 }: CreateProjectDialogProps) {
   const slug = toSlug(projectName)
@@ -150,6 +156,11 @@ function CreateProjectDialog({
                 <code className={previewClass}>{roomId}</code>
               </div>
             )}
+            {error && (
+              <div className="text-xs text-state-error px-1">
+                {error}
+              </div>
+            )}
           </div>
         </div>
         <DialogFooter className={dialogFooterClass}>
@@ -177,6 +188,7 @@ interface RenameProjectDialogProps {
   onClose: () => void
   onSubmit: () => void
   isLoading: boolean
+  error: string | null
 }
 
 function RenameProjectDialog({
@@ -187,6 +199,7 @@ function RenameProjectDialog({
   onClose,
   onSubmit,
   isLoading,
+  error,
 }: RenameProjectDialogProps) {
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
@@ -211,6 +224,11 @@ function RenameProjectDialog({
               }
             }}
           />
+          {error && (
+            <div className="text-xs text-state-error px-1">
+              {error}
+            </div>
+          )}
         </div>
         <DialogFooter className={dialogFooterClass}>
           <Button variant="outline" onClick={onClose} className={closeBtnClass} disabled={isLoading}>
@@ -235,6 +253,7 @@ interface DeleteProjectDialogProps {
   onClose: () => void
   onSubmit: () => void
   isLoading: boolean
+  error: string | null
 }
 
 function DeleteProjectDialog({
@@ -243,6 +262,7 @@ function DeleteProjectDialog({
   onClose,
   onSubmit,
   isLoading,
+  error,
 }: DeleteProjectDialogProps) {
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
@@ -253,6 +273,11 @@ function DeleteProjectDialog({
             Are you sure you want to delete "{targetName}"? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
+        {error && (
+          <div className="text-xs text-state-error px-6 pb-2">
+            {error}
+          </div>
+        )}
         <DialogFooter className={dialogFooterClass}>
           <Button variant="outline" onClick={onClose} className={closeBtnClass} disabled={isLoading}>
             Cancel

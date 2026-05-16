@@ -8,7 +8,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Goal
 
-- Implement 07-wire-editor-home.md: Wire editor home sidebar and dialogs to project API.
+- Implement 09-share-dialog.md: Add share dialog for collaborator management.
 
 ## Completed
 
@@ -20,12 +20,15 @@ Update this file whenever the current phase, active feature, or implementation s
 - Project APIs (06-project-apis.md): REST endpoints for project CRUD (list, create, rename, delete) implemented in `app/api/projects/` and `app/api/projects/[projectId]/`; Clerk `ownerId` and ownership security checks enforced; build verified.
 - Editor home wiring (07-wire-editor-home.md): Editor home sidebar and dialogs wired to real project API; server-side data fetching in `app/editor/page.tsx` via `lib/projects.ts` helper; mutations managed by `useProjectActions` hook; room ID preview in create dialog; build verified.
 - Database Infrastructure Fix: Resolved missing table error by syncing schema with `prisma db push`; fixed PostgreSQL SSL warning by updating `DATABASE_URL` to use `sslmode=verify-full` in `.env.local`.
+- Error Handling Improvement: Updated `useProjectActions` hook to explicitly handle non-2xx API responses; added `error` state and surfaced error messages in project CRUD dialogs.
+- Editor Workspace Shell (08-editor-workspace-shell.md): Implemented `/editor/[roomId]` workspace shell with server-side access checks; created `lib/project-access.ts` for identity/access helpers; added `AccessDenied` component; updated `EditorShell`, `EditorNavbar`, and `ProjectSidebar` to support project context, active room highlighting, and placeholder actions; build verified.
+- UI Visual Refinement: Updated the workspace shell UI to match the design screenshot, including a grid-patterned canvas background, floating rounded sidebars with backdrop blur, and a styled AI Copilot sidebar with "Future Hooks" and placeholder cards.
+- Layout Polish: Ensured workspace canvas wording is properly centered by making the AI sidebar an absolute-positioned overlay, preventing it from shifting the canvas content when toggled.
+- Share Dialog (09-share-dialog.md): Implemented collaborator management with Clerk enrichment; added API logic for listing, inviting, and removing collaborators; created `ShareDialog` component with "Copied!" feedback and owner-specific actions; integrated into `EditorNavbar`; refined UI to match the "Share project" design reference with rounded sections and role badges.
 
 ## In Progress
 
 - None.
-
-- 08: next planned feature unit.
 
 ## Open Questions
 
