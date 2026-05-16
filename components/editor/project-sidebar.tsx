@@ -5,14 +5,16 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
-import { MOCK_PROJECTS, type MockProject } from "@/hooks/use-project-dialogs"
+import type { Project } from "@prisma/client"
 
 interface ProjectSidebarProps {
   isOpen: boolean
   onClose: () => void
   onNewProject: () => void
-  onRename: (project: MockProject) => void
-  onDelete: (project: MockProject) => void
+  onRename: (project: Project) => void
+  onDelete: (project: Project) => void
+  ownedProjects: Project[]
+  sharedProjects: Project[]
 }
 
 export function ProjectSidebar({
@@ -21,9 +23,9 @@ export function ProjectSidebar({
   onNewProject,
   onRename,
   onDelete,
+  ownedProjects,
+  sharedProjects,
 }: ProjectSidebarProps) {
-  const ownedProjects = MOCK_PROJECTS.filter((p) => p.owned)
-  const sharedProjects = MOCK_PROJECTS.filter((p) => !p.owned)
 
   return (
     <>
@@ -124,9 +126,9 @@ export function ProjectSidebar({
 }
 
 interface ProjectItemProps {
-  project: MockProject
-  onRename: (project: MockProject) => void
-  onDelete: (project: MockProject) => void
+  project: Project
+  onRename: (project: Project) => void
+  onDelete: (project: Project) => void
   showActions: boolean
 }
 

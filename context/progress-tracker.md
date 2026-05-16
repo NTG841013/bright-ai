@@ -8,7 +8,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Goal
 
-- Implement 06-data-fetching.md: Server Actions and hooks for project CRUD.
+- Implement 07-wire-editor-home.md: Wire editor home sidebar and dialogs to project API.
 
 ## Completed
 
@@ -17,14 +17,15 @@ Update this file whenever the current phase, active feature, or implementation s
 - Auth (03-auth.md): @clerk/ui installed; proxy.ts with clerkMiddleware + createRouteMatcher (protects all routes except /sign-in and /sign-up); ClerkProvider with dark theme from @clerk/ui/themes wraps root layout; sign-in and sign-up pages with two-panel desktop layout (logo/tagline/feature list left, Clerk form right), form-only on mobile; / redirects authenticated users to /editor and unauthenticated to /sign-in; UserButton added to EditorNavbar right section.
 - Project dialogs (04-project-dialogs.md): EditorHome with heading/description/New Project button; useProjectDialogs hook (dialog type, form, loading state); Create dialog with live slug preview; Rename dialog with prefilled autofocus input and Enter-to-submit; Delete dialog with destructive confirm; ProjectSidebar renders mock project items with hover rename/delete for owned projects only; mobile backdrop scrim; all wired through EditorShell.
 - Prisma setup (05-prisma.md): Multi-file schema in `prisma/models/`; `Project` and `ProjectCollaborator` models with correct relations and indexes; cached Prisma client singleton in `lib/prisma.ts` with Accelerate/Direct branching; build verified.
+- Project APIs (06-project-apis.md): REST endpoints for project CRUD (list, create, rename, delete) implemented in `app/api/projects/` and `app/api/projects/[projectId]/`; Clerk `ownerId` and ownership security checks enforced; build verified.
+- Editor home wiring (07-wire-editor-home.md): Editor home sidebar and dialogs wired to real project API; server-side data fetching in `app/editor/page.tsx` via `lib/projects.ts` helper; mutations managed by `useProjectActions` hook; room ID preview in create dialog; build verified.
+- Database Infrastructure Fix: Resolved missing table error by syncing schema with `prisma db push`; fixed PostgreSQL SSL warning by updating `DATABASE_URL` to use `sslmode=verify-full` in `.env.local`.
 
 ## In Progress
 
 - None.
 
-## Next Up
-
-- 06: next planned feature unit.
+- 08: next planned feature unit.
 
 ## Open Questions
 
