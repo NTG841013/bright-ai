@@ -5,11 +5,22 @@ import { EditorNavbar } from "./editor-navbar"
 import { ProjectSidebar } from "./project-sidebar"
 import { ProjectDialogs } from "./project-dialogs"
 import { EditorHome } from "./editor-home"
-import { useProjectDialogs } from "@/hooks/use-project-dialogs"
+import { useProjectActions } from "@/hooks/use-project-actions"
+import type { Project } from "@prisma/client"
 
-export function EditorShell({ children }: { children?: React.ReactNode }) {
+interface EditorShellProps {
+  children?: React.ReactNode
+  ownedProjects: Project[]
+  sharedProjects: Project[]
+}
+
+export function EditorShell({
+  children,
+  ownedProjects,
+  sharedProjects,
+}: EditorShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const dialogs = useProjectDialogs()
+  const projectActions = useProjectActions()
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[var(--bg-base)]">
@@ -20,13 +31,15 @@ export function EditorShell({ children }: { children?: React.ReactNode }) {
       <ProjectSidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
-        onNewProject={dialogs.openCreate}
-        onRename={dialogs.openRename}
-        onDelete={dialogs.openDelete}
+        onNewProject={projectActions.openCreate}
+        onRename={projectActions.openRename}
+        onDelete={projectActions.openDelete}
+        ownedProjects={ownedProjects}
+        sharedProjects={sharedProjects}
       />
-      <ProjectDialogs dialogs={dialogs} />
+      <ProjectDialogs actions={projectActions} />
       <main className="flex flex-1 overflow-hidden">
-        {children ?? <EditorHome onNewProject={dialogs.openCreate} />}
+        {children ?? <EditorHome onNewProject={projectActions.openCreate} />}
       </main>
     </div>
   )
