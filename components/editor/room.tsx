@@ -19,7 +19,7 @@ export function Room({ roomId, children }: RoomProps) {
         id={roomId}
         initialPresence={{
           cursor: null,
-          isThinking: false,
+          thinking: false,
         }}
       >
         <ClientSideSuspense fallback={<Loading />}>

@@ -1,13 +1,15 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { LayoutTemplate, PanelLeftClose, PanelLeftOpen, Share2, Sparkles } from "lucide-react"
+import { LayoutTemplate, PanelLeftClose, PanelLeftOpen, Save, Share2, Sparkles } from "lucide-react"
 import { UserButton } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { ShareDialog } from "./share-dialog"
 import { StarterTemplatesModal } from "./starter-templates-modal"
 import { useReactFlow } from "@xyflow/react"
 import { CanvasTemplate } from "./starter-templates"
+import { useCanvas } from "./canvas-context"
+import { cn } from "@/lib/utils"
 
 interface EditorNavbarProps {
     isOpen: boolean
@@ -23,6 +25,7 @@ export function EditorNavbar({ isOpen, onToggle, projectId, projectName, onToggl
     const [isTemplatesOpen, setIsTemplatesOpen] = useState(false)
     const [mounted, setMounted] = useState(false)
     const { setNodes, setEdges, fitView } = useReactFlow()
+    const canvas = useCanvas()
 
     const handleImportTemplate = (template: CanvasTemplate) => {
         setNodes(template.nodes);
@@ -59,6 +62,24 @@ export function EditorNavbar({ isOpen, onToggle, projectId, projectName, onToggl
             <div className="flex items-center gap-2">
                 {projectName && (
                     <>
+                        {canvas && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 gap-2 border-[1.5px] border-border-subtle px-3"
+                                onClick={() => {
+                                    canvas?.triggerSave();
+                                }}
+                                disabled={canvas.saveStatus === "saving"}
+                            >
+                                <Save className={cn("h-3.5 w-3.5", canvas.saveStatus === "saving" && "animate-spin")} />
+                                <span className="text-xs">
+                                    {canvas.saveStatus === "saving" ? "Saving..." : 
+                                     canvas.saveStatus === "saved" ? "Saved" : 
+                                     canvas.saveStatus === "error" ? "Error" : "Save"}
+                                </span>
+                            </Button>
+                        )}
                         <Button 
                             variant="ghost" 
                             size="sm" 
@@ -89,7 +110,7 @@ export function EditorNavbar({ isOpen, onToggle, projectId, projectName, onToggl
                     </>
                 )}
                 {mounted ? (
-                    <UserButton />
+                    !canvas && <UserButton />
                 ) : (
                     <div className="h-7 w-7 animate-pulse rounded-full bg-border-subtle" />
                 )}

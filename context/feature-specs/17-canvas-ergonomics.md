@@ -30,7 +30,7 @@ The hook should:
 - ignore shortcuts while typing in inputs, textareas, or editable text fields
 
 5.Support these shortcuts:
-- `+` or `=`zoom in
+- `+` or `=` zoom in
 - `-` zoom out
 - `Cmd/Ctrl + Z` to undo
 - `Cmd/Ctrl + Shift + Z` to redo

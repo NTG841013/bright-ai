@@ -1,6 +1,7 @@
 import { Liveblocks } from "@liveblocks/node";
 
-const secret = process.env.LIVEBLOCKS_SECRET_KEY;
+const rawSecret = process.env.LIVEBLOCKS_SECRET_KEY;
+const secret = rawSecret?.trim();
 
 if (!secret) {
   throw new Error("Missing LIVEBLOCKS_SECRET_KEY environment variable");

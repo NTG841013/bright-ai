@@ -179,6 +179,13 @@ function TemplatePreview({ nodes, edges }: { nodes: CanvasNode[]; edges: CanvasE
             {shape === "hexagon" && (
               <path d={`M ${x + w * 0.3} ${y + h*0.1} L ${x + w * 0.7} ${y + h*0.1} L ${x + w*0.9} ${y + h / 2} L ${x + w * 0.7} ${y + h*0.9} L ${x + w * 0.3} ${y + h*0.9} L ${x + w*0.1} ${y + h / 2} Z`} fill={fill} stroke="white" strokeOpacity="0.2" strokeWidth="2" />
             )}
+            {shape === "cylinder" && (
+              <g>
+                <rect x={x + w*0.1} y={y + h*0.12} width={w*0.8} height={h*0.76} fill={fill} stroke="white" strokeOpacity="0.2" strokeWidth="2" />
+                <ellipse cx={x + w/2} cy={y + h*0.12} rx={w*0.4} ry={h*0.12} fill={fill} stroke="white" strokeOpacity="0.2" strokeWidth="2" />
+                <ellipse cx={x + w/2} cy={y + h*0.88} rx={w*0.4} ry={h*0.12} fill={fill} stroke="white" strokeOpacity="0.1" strokeWidth="2" />
+              </g>
+            )}
             {shape === "rectangle" && (
               <rect x={x + w*0.1} y={y + h*0.1} width={w*0.8} height={h*0.8} rx="8" fill={fill} stroke="white" strokeOpacity="0.2" strokeWidth="2" />
             )}
