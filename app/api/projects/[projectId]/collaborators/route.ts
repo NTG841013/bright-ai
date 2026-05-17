@@ -33,10 +33,10 @@ export async function GET(
   // Check access: must be owner or a collaborator
   // We need current user's email to check collaborator status
   const clerkUser = await clerk.users.getUser(userId)
-  const userEmail = clerkUser.emailAddresses[0]?.emailAddress
+  const userEmail = clerkUser.emailAddresses[0]?.emailAddress?.toLowerCase().trim()
 
   const isOwner = project.ownerId === userId
-  const isCollaborator = project.collaborators.some((c) => c.email === userEmail)
+  const isCollaborator = project.collaborators.some((c) => c.email.toLowerCase().trim() === userEmail)
 
   if (!isOwner && !isCollaborator) {
     return new NextResponse("Forbidden", { status: 403 })
@@ -58,6 +58,7 @@ export async function GET(
             name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || null,
             imageUrl: user.imageUrl,
             isClerkUser: true,
+            role: "COLLABORATOR",
           }
         }
       } catch (error) {
@@ -69,12 +70,28 @@ export async function GET(
         name: null,
         imageUrl: null,
         isClerkUser: false,
+        role: "COLLABORATOR",
       }
     })
   )
 
+  // Fetch and enrich owner data
+  let enrichedOwner = null
+  try {
+    const ownerUser = await clerk.users.getUser(project.ownerId)
+    enrichedOwner = {
+      email: ownerUser.emailAddresses[0]?.emailAddress || "",
+      name: `${ownerUser.firstName ?? ""} ${ownerUser.lastName ?? ""}`.trim() || null,
+      imageUrl: ownerUser.imageUrl,
+      isClerkUser: true,
+      role: "OWNER",
+    }
+  } catch (error) {
+    console.error(`Error fetching owner data for ${project.ownerId}:`, error)
+  }
+
   return NextResponse.json({
-    ownerId: project.ownerId,
+    owner: enrichedOwner,
     collaborators: enrichedCollaborators,
   })
 }
@@ -95,6 +112,8 @@ export async function POST(
     return new NextResponse("Email is required", { status: 400 })
   }
 
+  const normalizedEmail = email.toLowerCase().trim()
+
   const project = await prisma.project.findUnique({
     where: { id: projectId },
   })
@@ -109,7 +128,7 @@ export async function POST(
 
   // Don't add owner as collaborator
   const owner = await clerk.users.getUser(userId)
-  if (owner.emailAddresses.some(e => e.emailAddress === email)) {
+  if (owner.emailAddresses.some(e => e.emailAddress.toLowerCase().trim() === normalizedEmail)) {
     return new NextResponse("Owner cannot be added as a collaborator", { status: 400 })
   }
 
@@ -118,13 +137,13 @@ export async function POST(
       where: {
         projectId_email: {
           projectId,
-          email,
+          email: normalizedEmail,
         },
       },
       update: {}, // Do nothing if already exists
       create: {
         projectId,
-        email,
+        email: normalizedEmail,
       },
     })
 

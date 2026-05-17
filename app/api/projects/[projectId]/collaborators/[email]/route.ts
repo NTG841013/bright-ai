@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
+import { Prisma } from "@prisma/client"
 
 export async function DELETE(
   req: Request,
@@ -26,18 +27,26 @@ export async function DELETE(
     return new NextResponse("Forbidden: Only owners can remove collaborators", { status: 403 })
   }
 
+  const decodedEmail = decodeURIComponent(email).toLowerCase().trim()
+
   try {
     await prisma.projectCollaborator.delete({
       where: {
         projectId_email: {
           projectId,
-          email: decodeURIComponent(email),
+          email: decodedEmail,
         },
       },
     })
 
     return new NextResponse(null, { status: 204 })
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2025") {
+        return new NextResponse(null, { status: 404 })
+      }
+    }
+    
     console.error("Error removing collaborator:", error)
     return new NextResponse("Internal Server Error", { status: 500 })
   }

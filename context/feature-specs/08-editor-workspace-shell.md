@@ -6,7 +6,7 @@ Build the `/editor/[roomId]` workspace shell with server-side access checks. No 
 
 Before rendering:
 
-- unathenticated users must be redirected to `/sign-in`
+- unauthenticated users must be redirected to `/sign-in`
 - users without project access see `AccessDenied`
 - non-existent projects also show `AccessDenied`
 
@@ -43,7 +43,7 @@ Do not add real canvas logic, Liveblocks, AI chat, or sharing behavior yet.
 
 ## Check When Done
 
-- `/editor/[roomId]` build sucessfully
+- `/editor/[roomId]` build successfully
 - access helper exists outside the page component
 - `AccessDenied` is used for missing or unauthorized projects
 - workspace layout renders with current project context

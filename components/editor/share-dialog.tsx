@@ -20,6 +20,7 @@ interface EnrichedCollaborator {
   name: string | null
   imageUrl: string | null
   isClerkUser: boolean
+  role: "OWNER" | "COLLABORATOR"
 }
 
 interface ShareDialogProps {
@@ -31,12 +32,18 @@ interface ShareDialogProps {
 
 export function ShareDialog({ projectId, isOpen, onClose, isOwner }: ShareDialogProps) {
   const { user } = useUser()
+  const [owner, setOwner] = useState<EnrichedCollaborator | null>(null)
   const [collaborators, setCollaborators] = useState<EnrichedCollaborator[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [inviteEmail, setInviteEmail] = useState("")
   const [isInviting, setIsInviting] = useState(false)
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const getErrorMessage = (err: unknown): string => {
+    if (err instanceof Error) return err.message
+    return String(err)
+  }
 
   const fetchCollaborators = useCallback(async () => {
     setIsLoading(true)
@@ -45,6 +52,7 @@ export function ShareDialog({ projectId, isOpen, onClose, isOwner }: ShareDialog
       const res = await fetch(`/api/projects/${projectId}/collaborators`)
       if (!res.ok) throw new Error("Failed to fetch collaborators")
       const data = await res.json()
+      setOwner(data.owner)
       setCollaborators(data.collaborators)
     } catch (err) {
       setError("Could not load collaborators")
@@ -87,8 +95,8 @@ export function ShareDialog({ projectId, isOpen, onClose, isOwner }: ShareDialog
 
       setInviteEmail("")
       await fetchCollaborators()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(getErrorMessage(err))
     } finally {
       setIsInviting(false)
     }
@@ -103,8 +111,8 @@ export function ShareDialog({ projectId, isOpen, onClose, isOwner }: ShareDialog
 
       if (!res.ok) throw new Error("Failed to remove collaborator")
       await fetchCollaborators()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(getErrorMessage(err))
     }
   }
 
@@ -195,85 +203,99 @@ export function ShareDialog({ projectId, isOpen, onClose, isOwner }: ShareDialog
               <h3 className="text-sm font-medium text-text-primary">People with access</h3>
               {!isLoading && (
                 <span className="text-[10px] font-medium text-text-faint uppercase tracking-wider">
-                  {collaborators.length + 1} total
+                  {(collaborators.length + (owner ? 1 : 0))} total
                 </span>
               )}
             </div>
             
             <ScrollArea className="h-[280px] -mx-1 px-1">
               <div className="space-y-2 pb-2">
-                {/* Always show Owner first */}
-                {user && (
-                  <div className="flex items-center justify-between rounded-2xl border border-border-subtle bg-bg-base/30 p-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border-subtle">
-                        <img src={user.imageUrl} alt={user.fullName || "Owner"} className="h-full w-full object-cover" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="truncate text-sm font-medium text-text-primary">
-                            {user.fullName || user.primaryEmailAddress?.emailAddress}
-                          </p>
-                          <span className="shrink-0 rounded-full bg-accent-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-accent-primary border border-accent-primary/20">
-                            Owner
-                          </span>
-                        </div>
-                        <p className="truncate text-xs text-text-muted">
-                          {user.primaryEmailAddress?.emailAddress}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 {isLoading ? (
                   <div className="flex h-20 items-center justify-center">
                     <Loader2 className="h-5 w-5 animate-spin text-text-muted" />
                   </div>
                 ) : (
-                  collaborators.map((collab) => (
-                    <div
-                      key={collab.email}
-                      className="group flex items-center justify-between rounded-2xl border border-border-subtle bg-bg-base/30 p-3 transition-colors hover:bg-bg-elevated/30"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-bg-subtle border border-border-subtle">
-                          {collab.imageUrl ? (
-                            <img src={collab.imageUrl} alt={collab.name || collab.email} className="h-full w-full object-cover" />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center text-text-muted bg-bg-subtle text-xs font-bold uppercase">
-                              {(collab.name?.[0] || collab.email[0]).toUpperCase()}
-                            </div>
-                          )}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="truncate text-sm font-medium text-text-primary">
-                              {collab.name || collab.email.split('@')[0]}
-                            </p>
-                            <span className="shrink-0 rounded-full bg-bg-subtle px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-text-muted border border-border-subtle">
-                              Collaborator
-                            </span>
+                  <>
+                    {/* Always show Owner first */}
+                    {owner && (
+                      <div className="flex items-center justify-between rounded-2xl border border-border-subtle bg-bg-base/30 p-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border-subtle">
+                            {owner.imageUrl ? (
+                              <img src={owner.imageUrl} alt={owner.name || "Owner"} className="h-full w-full object-cover" />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-text-muted bg-bg-subtle text-xs font-bold uppercase">
+                                {(owner.name?.[0] || owner.email[0]).toUpperCase()}
+                              </div>
+                            )}
                           </div>
-                          <p className="truncate text-xs text-text-muted">
-                            {collab.email}
-                          </p>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="truncate text-sm font-medium text-text-primary">
+                                {owner.name || owner.email}
+                                {user?.primaryEmailAddress?.emailAddress?.toLowerCase() === owner.email.toLowerCase() && (
+                                  <span className="ml-1.5 text-[10px] text-text-muted font-normal">(You)</span>
+                                )}
+                              </p>
+                              <span className="shrink-0 rounded-full bg-accent-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-accent-primary border border-accent-primary/20">
+                                Owner
+                              </span>
+                            </div>
+                            <p className="truncate text-xs text-text-muted">
+                              {owner.email}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                      
-                      {isOwner && (
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          className="text-text-faint hover:text-state-error hover:bg-state-error/10 rounded-lg transition-all"
-                          onClick={() => handleRemove(collab.email)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Remove {collab.email}</span>
-                        </Button>
-                      )}
-                    </div>
-                  ))
+                    )}
+
+                    {collaborators.map((collab) => (
+                      <div
+                        key={collab.email}
+                        className="group flex items-center justify-between rounded-2xl border border-border-subtle bg-bg-base/30 p-3 transition-colors hover:bg-bg-elevated/30"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-bg-subtle border border-border-subtle">
+                            {collab.imageUrl ? (
+                              <img src={collab.imageUrl} alt={collab.name || collab.email} className="h-full w-full object-cover" />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-text-muted bg-bg-subtle text-xs font-bold uppercase">
+                                {(collab.name?.[0] || collab.email[0]).toUpperCase()}
+                              </div>
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="truncate text-sm font-medium text-text-primary">
+                                {collab.name || collab.email.split('@')[0]}
+                                {user?.primaryEmailAddress?.emailAddress?.toLowerCase() === collab.email.toLowerCase() && (
+                                  <span className="ml-1.5 text-[10px] text-text-muted font-normal">(You)</span>
+                                )}
+                              </p>
+                              <span className="shrink-0 rounded-full bg-bg-subtle px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-text-muted border border-border-subtle">
+                                Collaborator
+                              </span>
+                            </div>
+                            <p className="truncate text-xs text-text-muted">
+                              {collab.email}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {isOwner && (
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="text-text-faint hover:text-state-error hover:bg-state-error/10 rounded-lg transition-all"
+                            onClick={() => handleRemove(collab.email)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Remove {collab.email}</span>
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </>
                 )}
               </div>
             </ScrollArea>

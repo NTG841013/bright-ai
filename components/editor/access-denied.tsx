@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Lock } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 export function AccessDenied() {
   return (
@@ -15,11 +16,15 @@ export function AccessDenied() {
             You don't have permission to view this project or it doesn't exist.
           </p>
         </div>
-        <Button variant="outline" className="p-0">
-          <Link href="/editor" className="flex h-full w-full items-center justify-center px-2.5">
-            Back to Projects
-          </Link>
-        </Button>
+        <Link 
+          href="/editor" 
+          className={cn(
+            buttonVariants({ variant: "outline" }),
+            "px-2.5"
+          )}
+        >
+          Back to Projects
+        </Link>
       </div>
     </div>
   )
