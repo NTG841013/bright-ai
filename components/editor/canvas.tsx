@@ -9,16 +9,23 @@ import {
   useReactFlow,
   MarkerType,
   ConnectionLineType,
+  useNodes,
+  useEdges,
+  ReactFlowProvider,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useLiveblocksFlow } from "@liveblocks/react-flow";
-import { useUndo, useRedo, useCanUndo, useCanRedo } from "@liveblocks/react/suspense";
+import { useUndo, useRedo, useCanUndo, useCanRedo, useMyPresence } from "@liveblocks/react/suspense";
 import { CanvasNode, CanvasEdge, NodeShape } from "@/types/canvas";
 import { ShapePanel } from "./shape-panel";
 import { CanvasNodeComponent } from "./canvas-node";
 import { CanvasEdgeComponent } from "./canvas-edge";
 import { CanvasControls } from "./canvas-controls";
+import { PresenceAvatars } from "./presence-avatars";
+import { LiveCursors } from "./live-cursors";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useAutosave, SaveStatus } from "@/hooks/useAutosave";
+import { CanvasProvider, useCanvas } from "./canvas-context";
 
 const nodeTypes = {
   canvasNode: CanvasNodeComponent,
@@ -139,24 +146,46 @@ function DragPreview({ dragState }: { dragState: DragState }) {
   );
 }
 
+const MIN_NODE_SIZE = 40;
+const MAX_NODE_SIZE = 1000;
+
 function CanvasInner() {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { screenToFlowPosition, setNodes } = useReactFlow();
   const [dragState, setDragState] = useState<DragState>(null);
+  
+  const nodes = useNodes<CanvasNode>();
+  const edges = useEdges<CanvasEdge>();
 
   const undo = useUndo();
   const redo = useRedo();
   const canUndo = useCanUndo();
   const canRedo = useCanRedo();
+  const [, updateMyPresence] = useMyPresence();
 
   useKeyboardShortcuts({ undo, redo, canUndo, canRedo });
 
+  const onPointerMove = useCallback((event: React.PointerEvent) => {
+    event.preventDefault();
+    const position = screenToFlowPosition({
+      x: event.clientX,
+      y: event.clientY,
+    });
+
+    updateMyPresence({ cursor: position });
+  }, [screenToFlowPosition, updateMyPresence]);
+
+  const onPointerLeave = useCallback(() => {
+    updateMyPresence({ cursor: null });
+  }, [updateMyPresence]);
+
   const {
-    nodes,
-    edges,
+    nodes: _nodes,
+    edges: _edges,
     onNodesChange,
     onEdgesChange,
     onConnect,
+    onDelete,
   } = useLiveblocksFlow<CanvasNode, CanvasEdge>({
     nodes: {
       initial: [],
@@ -165,6 +194,49 @@ function CanvasInner() {
       initial: [],
     },
   });
+
+  const onKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (
+      event.target instanceof HTMLInputElement ||
+      event.target instanceof HTMLTextAreaElement ||
+      (event.target as HTMLElement).isContentEditable
+    ) {
+      return;
+    }
+
+    if (event.key === "Delete" || event.key === "Backspace") {
+      const selectedNodes = nodes?.filter((node) => node.selected);
+      const selectedEdges = edges?.filter((edge) => edge.selected);
+
+      console.log("CanvasInner: Delete/Backspace key detected", {
+        key: event.key,
+        selectedNodesCount: selectedNodes?.length,
+        selectedEdgesCount: selectedEdges?.length,
+      });
+
+      if (selectedNodes?.length || selectedEdges?.length) {
+        console.log("CanvasInner: Calling onDelete", {
+          nodes: selectedNodes.map(n => n.id),
+          edges: selectedEdges.map(e => e.id)
+        });
+        onDelete?.({
+          nodes: selectedNodes || [],
+          edges: selectedEdges || [],
+        });
+      } else {
+        console.log("CanvasInner: No selected elements to delete");
+      }
+    }
+  }, [nodes, edges, onDelete]);
+
+  const { status, triggerSave } = useAutosave(_nodes, _edges);
+  const canvas = useCanvas();
+
+  useEffect(() => {
+    if (canvas) {
+      canvas.setSaveState(status, triggerSave);
+    }
+  }, [status, triggerSave]); // Removed canvas from dependencies to reduce re-registration noise
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
@@ -214,7 +286,7 @@ function CanvasInner() {
           return;
         }
 
-        const { shape, width, height } = parsed;
+        const { shape, width, height, offsetX = 0, offsetY = 0 } = parsed;
 
         // Validate NodeShape
         const validShapes: NodeShape[] = [
@@ -235,9 +307,13 @@ function CanvasInner() {
           return;
         }
 
+        // Clamp dimensions to sane bounds
+        const clampedWidth = Math.min(Math.max(width, MIN_NODE_SIZE), MAX_NODE_SIZE);
+        const clampedHeight = Math.min(Math.max(height, MIN_NODE_SIZE), MAX_NODE_SIZE);
+
         const position = screenToFlowPosition({
-          x: event.clientX,
-          y: event.clientY,
+          x: event.clientX - offsetX,
+          y: event.clientY - offsetY,
         });
 
         const newNode: CanvasNode = {
@@ -247,8 +323,8 @@ function CanvasInner() {
           data: {
             label: "",
             shape: shape as NodeShape,
-            width,
-            height,
+            width: clampedWidth,
+            height: clampedHeight,
           },
         };
 
@@ -263,10 +339,18 @@ function CanvasInner() {
   );
 
   return (
-    <div className="h-full w-full bg-[#0a0a0a]" ref={reactFlowWrapper}>
+    <div 
+      className="h-full w-full bg-[#0a0a0a]" 
+      ref={reactFlowWrapper}
+      onPointerMove={onPointerMove}
+      onPointerLeave={onPointerLeave}
+      onKeyDown={onKeyDown}
+      tabIndex={0}
+    >
+      <PresenceAvatars />
       <ReactFlow
-        nodes={nodes ?? []}
-        edges={edges ?? []}
+        nodes={_nodes ?? []}
+        edges={_edges ?? []}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
@@ -278,12 +362,21 @@ function CanvasInner() {
         onDrop={onDrop}
         connectionLineType={ConnectionLineType.SmoothStep}
         connectionLineStyle={{ stroke: "#f8fafc", strokeWidth: 2, opacity: 0.6 }}
-        fitView
+        fitView={false}
+        onDelete={onDelete}
         connectionMode={ConnectionMode.Loose}
         colorMode="dark"
       >
+        <LiveCursors />
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
-        <svg style={{ position: 'absolute', top: 0, left: 0 }}>
+        <svg 
+          width="0" 
+          height="0" 
+          style={{ position: 'absolute', pointerEvents: 'none' }} 
+          overflow="visible" 
+          aria-hidden="true" 
+          focusable="false"
+        >
           <defs>
             <marker
               id="bright-arrowhead"
@@ -308,6 +401,8 @@ function CanvasInner() {
 
 export function Canvas() {
   return (
-    <CanvasInner />
+    <ReactFlowProvider>
+      <CanvasInner />
+    </ReactFlowProvider>
   );
 }

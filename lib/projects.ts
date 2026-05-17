@@ -1,14 +1,13 @@
 import { prisma } from "@/lib/prisma"
-import { auth, currentUser } from "@clerk/nextjs/server"
+import { getClerkIdentity } from "./project-access"
 
-export async function getProjects() {
-  const { userId } = await auth()
-  if (!userId) {
+export async function getProjects(identityParam?: { userId: string; email: string }) {
+  const identity = identityParam || await getClerkIdentity()
+  if (!identity) {
     return { owned: [], shared: [] }
   }
 
-  const user = await currentUser()
-  const userEmail = user?.emailAddresses[0]?.emailAddress?.toLowerCase().trim()
+  const { userId, email: userEmail } = identity
 
   const [owned, shared] = await Promise.all([
     prisma.project.findMany({

@@ -23,7 +23,7 @@ Replace the default canvas edges with custom edges that feel easier to follow, e
 - double-click an edge to edit its label
 - use React Flow's `EdgeLabelRenderer` and the path midpoint coordinates from `getSmoothStepPath` to position the label -do not calculate midpoint position manually
 - use an input that grows with the label text
-- save the label on blur, Enter, or Escape
+- save the label on blur or Enter; Escape reverts/cancels the edit
 - show saved labels as small pill badges
 - when an active edge has no label, show a faint hint
 - prevent label clicks and typing from dragging or panning the canvas

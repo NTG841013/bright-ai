@@ -5,6 +5,7 @@ import { EditorShell } from "@/components/editor/editor-shell"
 import { AccessDenied } from "@/components/editor/access-denied"
 import { Room } from "@/components/editor/room"
 import { Canvas } from "@/components/editor/canvas"
+import { CanvasProvider } from "@/components/editor/canvas-context"
 
 interface EditorRoomPageProps {
   params: Promise<{ roomId: string }>
@@ -18,7 +19,7 @@ export default async function EditorRoomPage({ params }: EditorRoomPageProps) {
     redirect("/sign-in")
   }
 
-  const project = await checkProjectAccess(roomId)
+  const project = await checkProjectAccess(roomId, identity)
   if (!project) {
     return (
       <EditorShell ownedProjects={[]} sharedProjects={[]}>
@@ -28,18 +29,20 @@ export default async function EditorRoomPage({ params }: EditorRoomPageProps) {
   }
 
   const isOwner = project.ownerId === identity.userId
-  const { owned, shared } = await getProjects()
+  const { owned, shared } = await getProjects(identity)
 
   return (
-    <EditorShell 
-      ownedProjects={owned} 
-      sharedProjects={shared} 
-      activeProject={project}
-      isOwner={isOwner}
-    >
-      <Room roomId={roomId}>
-        <Canvas />
-      </Room>
-    </EditorShell>
+    <CanvasProvider>
+      <EditorShell 
+        ownedProjects={owned} 
+        sharedProjects={shared} 
+        activeProject={project}
+        isOwner={isOwner}
+      >
+        <Room roomId={roomId}>
+          <Canvas />
+        </Room>
+      </EditorShell>
+    </CanvasProvider>
   )
 }

@@ -14,7 +14,17 @@ const SHAPES: { shape: NodeShape; icon: any; width: number; height: number }[] =
 
 export function ShapePanel() {
   const onDragStart = (event: React.DragEvent, shape: NodeShape, width: number, height: number) => {
-    event.dataTransfer.setData("application/reactflow", JSON.stringify({ shape, width, height }));
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const offsetX = event.clientX - rect.left;
+    const offsetY = event.clientY - rect.top;
+    
+    event.dataTransfer.setData("application/reactflow", JSON.stringify({ 
+      shape, 
+      width, 
+      height,
+      offsetX,
+      offsetY
+    }));
     event.dataTransfer.effectAllowed = "move";
   };
 

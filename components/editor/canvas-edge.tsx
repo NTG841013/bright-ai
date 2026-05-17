@@ -24,14 +24,10 @@ export function CanvasEdgeComponent({
 }: EdgeProps<CanvasEdge>) {
   const { setEdges } = useReactFlow();
   const [isEditing, setIsEditing] = useState(false);
-  const [label, setLabel] = useState(data?.label || "");
+  const [label, setLabel] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (!isEditing) {
-      setLabel(data?.label || "");
-    }
-  }, [data?.label, isEditing]);
+  const displayLabel = data?.label || "";
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -52,8 +48,9 @@ export function CanvasEdgeComponent({
 
   const onDoubleClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+    setLabel(displayLabel);
     setIsEditing(true);
-  }, []);
+  }, [displayLabel]);
 
   const handleBlur = useCallback(() => {
     setIsEditing(false);
@@ -129,17 +126,17 @@ export function CanvasEdgeComponent({
               }}
             />
           ) : (
-            (label || selected) && (
+            (displayLabel || selected) && (
               <div
                 onDoubleClick={onDoubleClick}
                 className={cn(
                   "px-2 py-0.5 rounded-full text-[10px] font-medium transition-all cursor-text whitespace-nowrap",
-                  label 
+                  displayLabel 
                     ? "bg-[#18181c] border border-[#3a3a42] text-[#c0c0cc] hover:border-[#00c8d4] hover:text-[#f0f0f4]" 
                     : "bg-transparent border border-dashed border-[#505060] text-[#505060] opacity-0 hover:opacity-100"
                 )}
               >
-                {label || "Add label"}
+                {displayLabel || "Add label"}
               </div>
             )
           )}

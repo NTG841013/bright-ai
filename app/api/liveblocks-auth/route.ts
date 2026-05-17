@@ -1,11 +1,15 @@
-import { currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { liveblocks, getUserColor } from "@/lib/liveblocks";
-import { checkProjectAccess } from "@/lib/project-access";
+import { checkProjectAccess, getClerkIdentity } from "@/lib/project-access";
 
 export async function POST(request: NextRequest) {
-  // 1. Require Clerk authentication & verify project access
-  // Using the project ID (roomId) from the request body as specified
+  // 1. Require Clerk authentication
+  const identity = await getClerkIdentity();
+  if (!identity) {
+    return new NextResponse("Unauthorized", { status: 403 });
+  }
+
+  // 2. Parse room ID from request body
   let room: string;
   try {
     const body = await request.json();
@@ -24,34 +28,28 @@ export async function POST(request: NextRequest) {
     return new NextResponse("Missing room ID", { status: 400 });
   }
 
-  // 2. Verify project access using the existing access helper
-  // The helper also ensures the user is authenticated via Clerk
-  const project = await checkProjectAccess(room);
+  // 3. Verify project access using the existing access helper
+  const project = await checkProjectAccess(room, identity);
 
   if (!project) {
     // Return 403 for unauthorized project access as specified
     return new NextResponse("Unauthorized", { status: 403 });
   }
 
-  // Get user details from Clerk
-  const user = await currentUser();
-  if (!user) {
-    return new NextResponse("Unauthorized", { status: 403 });
-  }
-
-  const userId = user.id;
-  const name = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "Anonymous";
-  const avatar = user.imageUrl;
+  const userId = identity.userId;
+  const name = `${identity.firstName ?? ""} ${identity.lastName ?? ""}`.trim() || "Anonymous";
+  const avatar = identity.imageUrl || ""; // Ensure string type for Liveblocks
   const color = getUserColor(userId);
 
-  // 3. Ensure the Liveblocks room exists (create if needed) using getOrCreateRoom for atomicity
+  // 4. Ensure the Liveblocks room exists (create if needed) using getOrCreateRoom for atomicity
+  // We do this BEFORE preparing the session to ensure the room is there.
   try {
     await liveblocks.getOrCreateRoom(room, {
       defaultAccesses: [], // Private by default, managed by our auth route
     });
   } catch (error) {
     console.error("Error ensuring Liveblocks room exists:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    // Continue anyway, authorize might still work if room was just created or exists
   }
 
   try {
@@ -64,7 +62,6 @@ export async function POST(request: NextRequest) {
     });
 
     // Grant the user access to the room
-    // Since we verified access via checkProjectAccess, we allow FULL access here
     session.allow(room, session.FULL_ACCESS);
 
     // Authorize the user and return the result
