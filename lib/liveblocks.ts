@@ -1,10 +1,16 @@
 import { Liveblocks } from "@liveblocks/node";
 
+const secret = process.env.LIVEBLOCKS_SECRET_KEY;
+
+if (!secret) {
+  throw new Error("Missing LIVEBLOCKS_SECRET_KEY environment variable");
+}
+
 /**
  * Cached Liveblocks node client
  */
 export const liveblocks = new Liveblocks({
-  secret: process.env.LIVEBLOCKS_SECRET_KEY || "sk_placeholder",
+  secret,
 });
 
 /**

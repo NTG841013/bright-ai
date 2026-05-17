@@ -9,7 +9,13 @@ export async function POST(request: NextRequest) {
   let room: string;
   try {
     const body = await request.json();
-    room = body.room;
+    const roomValue = body.room;
+
+    if (typeof roomValue !== "string") {
+      return new NextResponse("Invalid room ID", { status: 400 });
+    }
+
+    room = roomValue.trim();
   } catch (e) {
     return new NextResponse("Invalid request body", { status: 400 });
   }
@@ -38,22 +44,14 @@ export async function POST(request: NextRequest) {
   const avatar = user.imageUrl;
   const color = getUserColor(userId);
 
-  // 3. Ensure the Liveblocks room exists (create if needed)
-  // Note: identifyUser handles session creation. 
-  // Liveblocks "rooms" are created on the fly usually, but we can manage them if needed.
-  // The spec says "ensure the Liveblocks room exists (create if needed)".
+  // 3. Ensure the Liveblocks room exists (create if needed) using getOrCreateRoom for atomicity
   try {
-    await liveblocks.getRoom(room);
-  } catch (error: any) {
-    if (error.status === 404) {
-      // Create room if it doesn't exist
-      await liveblocks.createRoom(room, {
-        defaultAccesses: [], // Private by default, managed by our auth route
-      });
-    } else {
-      console.error("Error fetching Liveblocks room:", error);
-      return new NextResponse("Internal Server Error", { status: 500 });
-    }
+    await liveblocks.getOrCreateRoom(room, {
+      defaultAccesses: [], // Private by default, managed by our auth route
+    });
+  } catch (error) {
+    console.error("Error ensuring Liveblocks room exists:", error);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 
   try {
