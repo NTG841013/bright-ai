@@ -13,7 +13,7 @@ const user = await prisma.user.findUnique({
   where: { id: 1 }
 })
 
-const user = await prisma.user.findUnique({
+const userByEmail = await prisma.user.findUnique({
   where: { email: 'alice@prisma.io' }
 })
 ```

@@ -1,10 +1,11 @@
 "use client"
 
-import { X, Plus, Pencil, Trash2 } from "lucide-react"
+import { X, Plus, Pencil, Trash2, Layout } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
 import type { Project } from "@prisma/client"
 
 interface ProjectSidebarProps {
@@ -15,6 +16,7 @@ interface ProjectSidebarProps {
   onDelete: (project: Project) => void
   ownedProjects: Project[]
   sharedProjects: Project[]
+  activeProjectId?: string
 }
 
 export function ProjectSidebar({
@@ -25,6 +27,7 @@ export function ProjectSidebar({
   onDelete,
   ownedProjects,
   sharedProjects,
+  activeProjectId,
 }: ProjectSidebarProps) {
 
   return (
@@ -39,7 +42,7 @@ export function ProjectSidebar({
 
       <aside
         className={cn(
-          "fixed left-3 top-[3.75rem] z-50 flex w-72 flex-col rounded-2xl border border-border-subtle bg-bg-surface/95 backdrop-blur-xl transition-transform duration-200",
+          "fixed left-3 top-[3.75rem] z-50 flex w-72 flex-col rounded-2xl border border-border-subtle bg-bg-surface/95 shadow-2xl backdrop-blur-xl transition-transform duration-200",
           "bottom-3",
           isOpen ? "translate-x-0" : "-translate-x-[calc(100%+1rem)]"
         )}
@@ -53,16 +56,16 @@ export function ProjectSidebar({
         </div>
 
         <Tabs defaultValue="my-projects" className="flex flex-1 flex-col overflow-hidden">
-          <TabsList className="mx-3 mt-3 w-[calc(100%-1.5rem)] shrink-0 bg-bg-elevated">
+          <TabsList className="mx-3 mt-3 h-10 w-[calc(100%-1.5rem)] shrink-0 bg-bg-elevated p-1">
             <TabsTrigger
               value="my-projects"
-              className="flex-1 text-text-muted hover:text-text-secondary data-active:bg-bg-subtle data-active:text-text-primary data-active:border-border-subtle"
+              className="flex-1 rounded-lg text-xs font-medium text-text-muted transition-all data-active:bg-bg-subtle data-active:text-text-primary data-active:shadow-sm"
             >
               My Projects
             </TabsTrigger>
             <TabsTrigger
               value="shared"
-              className="flex-1 text-text-muted hover:text-text-secondary data-active:bg-bg-subtle data-active:text-text-primary data-active:border-border-subtle"
+              className="flex-1 rounded-lg text-xs font-medium text-text-muted transition-all data-active:bg-bg-subtle data-active:text-text-primary data-active:shadow-sm"
             >
               Shared
             </TabsTrigger>
@@ -82,6 +85,7 @@ export function ProjectSidebar({
                     onRename={onRename}
                     onDelete={onDelete}
                     showActions
+                    isActive={project.id === activeProjectId}
                   />
                 ))}
               </ScrollArea>
@@ -102,6 +106,7 @@ export function ProjectSidebar({
                     onRename={onRename}
                     onDelete={onDelete}
                     showActions={false}
+                    isActive={project.id === activeProjectId}
                   />
                 ))}
               </ScrollArea>
@@ -130,18 +135,40 @@ interface ProjectItemProps {
   onRename: (project: Project) => void
   onDelete: (project: Project) => void
   showActions: boolean
+  isActive?: boolean
 }
 
-function ProjectItem({ project, onRename, onDelete, showActions }: ProjectItemProps) {
+function ProjectItem({ project, onRename, onDelete, showActions, isActive }: ProjectItemProps) {
   return (
-    <div className="group/item flex items-center gap-1 rounded-xl px-2 py-2 hover:bg-bg-elevated">
-      <span className="flex-1 truncate text-sm text-text-primary">{project.name}</span>
+    <Link
+      href={`/editor/${project.id}`}
+      className={cn(
+        "group/item relative flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200",
+        isActive 
+          ? "bg-bg-elevated text-text-primary shadow-sm border border-border-subtle" 
+          : "text-text-secondary hover:bg-bg-elevated/50 hover:text-text-primary"
+      )}
+    >
+      {isActive && (
+        <div className="absolute left-1 h-1.5 w-1.5 rounded-full bg-accent-primary shadow-[0_0_8px_rgba(0,200,212,0.5)]" />
+      )}
+      <div className={cn(
+        "flex h-2 w-2 rounded-full",
+        isActive ? "bg-accent-primary" : "bg-text-muted"
+      )} />
+      <span className={cn(
+        "flex-1 truncate text-sm font-medium",
+        isActive ? "text-text-primary" : "text-text-secondary"
+      )}>
+        {project.name}
+      </span>
       {showActions && (
         <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover/item:opacity-100 group-focus-within/item:opacity-100">
           <Button
             variant="ghost"
             size="icon-sm"
             onClick={(e) => {
+              e.preventDefault()
               e.stopPropagation()
               onRename(project)
             }}
@@ -153,6 +180,7 @@ function ProjectItem({ project, onRename, onDelete, showActions }: ProjectItemPr
             variant="ghost"
             size="icon-sm"
             onClick={(e) => {
+              e.preventDefault()
               e.stopPropagation()
               onDelete(project)
             }}
@@ -162,6 +190,6 @@ function ProjectItem({ project, onRename, onDelete, showActions }: ProjectItemPr
           </Button>
         </div>
       )}
-    </div>
+    </Link>
   )
 }

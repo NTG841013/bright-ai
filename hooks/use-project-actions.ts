@@ -14,29 +14,34 @@ export function useProjectActions() {
   const [dialogType, setDialogType] = useState<DialogType>(null)
   const [targetProject, setTargetProject] = useState<Project | null>(null)
   const [projectName, setProjectName] = useState("")
+  const [error, setError] = useState<string | null>(null)
   const [suffix] = useState(() => Math.random().toString(36).substring(2, 6))
 
   const openCreate = () => {
     setDialogType("create")
     setProjectName("")
     setTargetProject(null)
+    setError(null)
   }
 
   const openRename = (project: Project) => {
     setDialogType("rename")
     setProjectName(project.name)
     setTargetProject(project)
+    setError(null)
   }
 
   const openDelete = (project: Project) => {
     setDialogType("delete")
     setTargetProject(project)
+    setError(null)
   }
 
   const close = () => {
     setDialogType(null)
     setTargetProject(null)
     setProjectName("")
+    setError(null)
   }
 
   const handleCreate = async () => {
@@ -44,6 +49,7 @@ export function useProjectActions() {
 
     startTransition(async () => {
       try {
+        setError(null)
         const response = await fetch("/api/projects", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -54,9 +60,13 @@ export function useProjectActions() {
           const project = await response.json()
           close()
           router.push(`/editor/${project.id}`)
+        } else {
+          const data = await response.json().catch(() => ({}))
+          setError(data.error || response.statusText || "Failed to create project")
         }
       } catch (error) {
         console.error("Failed to create project:", error)
+        setError("An unexpected error occurred")
       }
     })
   }
@@ -66,6 +76,7 @@ export function useProjectActions() {
 
     startTransition(async () => {
       try {
+        setError(null)
         const response = await fetch(`/api/projects/${targetProject.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -75,9 +86,13 @@ export function useProjectActions() {
         if (response.ok) {
           close()
           router.refresh()
+        } else {
+          const data = await response.json().catch(() => ({}))
+          setError(data.error || response.statusText || "Failed to rename project")
         }
       } catch (error) {
         console.error("Failed to rename project:", error)
+        setError("An unexpected error occurred")
       }
     })
   }
@@ -87,6 +102,7 @@ export function useProjectActions() {
 
     startTransition(async () => {
       try {
+        setError(null)
         const response = await fetch(`/api/projects/${targetProject.id}`, {
           method: "DELETE",
         })
@@ -99,9 +115,13 @@ export function useProjectActions() {
           } else {
             router.refresh()
           }
+        } else {
+          const data = await response.json().catch(() => ({}))
+          setError(data.error || response.statusText || "Failed to delete project")
         }
       } catch (error) {
         console.error("Failed to delete project:", error)
+        setError("An unexpected error occurred")
       }
     })
   }
@@ -111,6 +131,7 @@ export function useProjectActions() {
     targetProject,
     projectName,
     setProjectName,
+    error,
     isLoading: isPending,
     suffix,
     openCreate,
