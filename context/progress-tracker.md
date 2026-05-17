@@ -8,7 +8,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Goal
 
-- None.
+- Shape panel (12-shape-panel.md)
 
 ## Completed
 
@@ -22,8 +22,8 @@ Update this file whenever the current phase, active feature, or implementation s
 - Database Infrastructure Fix: Resolved missing table error by syncing schema with `prisma db push`; fixed PostgreSQL SSL warning by updating `DATABASE_URL` to use `sslmode=verify-full` in `.env.local`.
 - Error Handling Improvement: Updated `useProjectActions` hook to explicitly handle non-2xx API responses; added `error` state and surfaced error messages in project CRUD dialogs.
 - Editor Workspace Shell (08-editor-workspace-shell.md): Implemented `/editor/[roomId]` workspace shell with server-side access checks; created `lib/project-access.ts` for identity/access helpers; added `AccessDenied` component; updated `EditorShell`, `EditorNavbar`, and `ProjectSidebar` to support project context, active room highlighting, and placeholder actions; build verified.
-- UI Visual Refinement: Updated the workspace shell UI to match the design screenshot, including a grid-patterned canvas background, floating rounded sidebars with backdrop blur, and a styled AI Copilot sidebar with "Future Hooks" and placeholder cards.
-- Layout Polish: Ensured workspace canvas wording is properly centered by making the AI sidebar an absolute-positioned overlay, preventing it from shifting the canvas content when toggled.
+- UI Visual Refinement: Updated the workspace shell UI to match the design screenshot, including a grid-patterned canvas background, separate rounded boxes for navbar and sidebars, and a layout-integrated AI Copilot sidebar.
+- Layout Polish: Refined the Editor Workspace layout with thicker borders (`1.5px`), consistent `border-border-subtle` coloring, and standardized module alignment for a more "box-like" separated feel.
 - Share Dialog (09-share-dialog.md): Implemented collaborator management with Clerk enrichment; added API logic for listing, inviting, and removing collaborators; created `ShareDialog` component with "Copied!" feedback and owner-specific actions; integrated into `EditorNavbar`; refined UI to match the "Share project" design reference with rounded sections and role badges.
 - Share Dialog Logic Fix: Updated `ShareDialog` to correctly fetch and display the project owner regardless of the signed-in user's role; corrected total collaborator count in header; added "(You)" indicator for the current user's entry in the access list; refined badge logic to use actual roles from the enriched API response.
 - Data Integrity: Standardized email normalization (trim and lowercase) across all collaborator-related APIs and access helpers to prevent case-variant access bypasses.
@@ -31,6 +31,11 @@ Update this file whenever the current phase, active feature, or implementation s
 - Type Safety: Improved error handling in `ShareDialog` by replacing unsafe `any` catch typings with `unknown` and implementing a safe error message extraction helper.
 - Documentation: Fixed typos in `context/feature-specs/08-editor-workspace-shell.md` ("unauthenticated", "successfully").
 - Security: Patched a vulnerability in `lib/project-access.ts` where a missing user email could bypass Prisma filters and grant unauthorized access to projects.
+- Liveblocks setup (10-liveblocks-setup.md): Configured Presence and UserMeta in `liveblocks.config.ts`; created cached Node client with deterministic color helper in `lib/liveblocks.ts`; implemented `POST /api/liveblocks-auth` with Clerk auth, project access verification, and room management; build verified.
+- Base collaborative canvas (11-base-canvas.md): Implemented Liveblocks-backed React Flow canvas with shared types, room provider wrapper, and basic canvas foundation (MiniMap, Background, fitView); build verified.
+- Shape panel (12-shape-panel.md): Implemented bottom shape panel with draggable shapes (rectangle, diamond, circle, pill, cylinder, hexagon); added drag-and-drop support for creating nodes on the canvas with unique IDs and custom node rendering; build verified.
+- Shape Visuals and Layout Fix: Implemented actual SVG shapes (diamond, circle, hexagon, cylinder, pill) in `CanvasNodeComponent`; reduced default shape sizes for better canvas management; fixed layout issue where canvas would be hidden behind sidebars by using relative positioning and flexbox instead of fixed overlays.
+- Sidebar Floating Layout and Node Resizing: Re-implemented sidebars as floating overlays with semi-transparent backgrounds and shadows; allowed canvas to extend edge-to-edge behind sidebars; enabled node resizing using the cursor via `NodeResizer`.
 
 ## In Progress
 
