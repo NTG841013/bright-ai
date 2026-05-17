@@ -1,10 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { PanelLeftClose, PanelLeftOpen, Share2, Sparkles } from "lucide-react"
+import { LayoutTemplate, PanelLeftClose, PanelLeftOpen, Share2, Sparkles } from "lucide-react"
 import { UserButton } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { ShareDialog } from "./share-dialog"
+import { StarterTemplatesModal } from "./starter-templates-modal"
+import { useReactFlow } from "@xyflow/react"
+import { CanvasTemplate } from "./starter-templates"
 
 interface EditorNavbarProps {
     isOpen: boolean
@@ -17,7 +20,18 @@ interface EditorNavbarProps {
 
 export function EditorNavbar({ isOpen, onToggle, projectId, projectName, onToggleAi, isOwner = false }: EditorNavbarProps) {
     const [isShareOpen, setIsShareOpen] = useState(false)
+    const [isTemplatesOpen, setIsTemplatesOpen] = useState(false)
     const [mounted, setMounted] = useState(false)
+    const { setNodes, setEdges, fitView } = useReactFlow()
+
+    const handleImportTemplate = (template: CanvasTemplate) => {
+        setNodes(template.nodes);
+        setEdges(template.edges);
+        // Small timeout to allow nodes to render before fitting view
+        setTimeout(() => {
+            fitView({ padding: 0.2, duration: 800 });
+        }, 50);
+    }
 
     useEffect(() => {
         setMounted(true)
@@ -48,6 +62,15 @@ export function EditorNavbar({ isOpen, onToggle, projectId, projectName, onToggl
                         <Button 
                             variant="ghost" 
                             size="sm" 
+                            className="hidden h-7 gap-2 border-[1.5px] border-border-subtle px-3 lg:flex"
+                            onClick={() => setIsTemplatesOpen(true)}
+                        >
+                            <LayoutTemplate className="h-3.5 w-3.5" />
+                            <span className="text-xs">Templates</span>
+                        </Button>
+                        <Button 
+                            variant="ghost" 
+                            size="sm" 
                             className="hidden h-7 gap-2 border-[1.5px] border-border-subtle px-3 md:flex"
                             onClick={() => setIsShareOpen(true)}
                         >
@@ -73,12 +96,19 @@ export function EditorNavbar({ isOpen, onToggle, projectId, projectName, onToggl
             </div>
 
             {projectId && (
-                <ShareDialog 
-                    projectId={projectId} 
-                    isOpen={isShareOpen} 
-                    onClose={() => setIsShareOpen(false)} 
-                    isOwner={isOwner}
-                />
+                <>
+                    <ShareDialog 
+                        projectId={projectId} 
+                        isOpen={isShareOpen} 
+                        onClose={() => setIsShareOpen(false)} 
+                        isOwner={isOwner}
+                    />
+                    <StarterTemplatesModal
+                        open={isTemplatesOpen}
+                        onOpenChange={setIsTemplatesOpen}
+                        onImport={handleImportTemplate}
+                    />
+                </>
             )}
         </header>
     )
