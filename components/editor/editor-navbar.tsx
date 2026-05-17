@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { PanelLeftClose, PanelLeftOpen, Share2, Sparkles } from "lucide-react"
 import { UserButton } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
@@ -17,8 +17,13 @@ interface EditorNavbarProps {
 
 export function EditorNavbar({ isOpen, onToggle, projectId, projectName, onToggleAi, isOwner = false }: EditorNavbarProps) {
     const [isShareOpen, setIsShareOpen] = useState(false)
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
     return (
-        <header className="flex h-12 shrink-0 items-center justify-between border-b border-border-default bg-bg-surface px-3">
+        <header className="flex h-12 shrink-0 items-center justify-between border-[1.5px] border-border-subtle bg-bg-surface px-3 rounded-xl mx-3 mt-3 shadow-sm">
             <div className="flex min-w-0 items-center gap-3">
                 <Button variant="ghost" size="icon" onClick={onToggle}>
                     {isOpen ? (
@@ -43,7 +48,7 @@ export function EditorNavbar({ isOpen, onToggle, projectId, projectName, onToggl
                         <Button 
                             variant="ghost" 
                             size="sm" 
-                            className="hidden h-7 gap-2 border border-border-default px-3 md:flex"
+                            className="hidden h-7 gap-2 border-[1.5px] border-border-subtle px-3 md:flex"
                             onClick={() => setIsShareOpen(true)}
                         >
                             <Share2 className="h-3.5 w-3.5" />
@@ -53,14 +58,18 @@ export function EditorNavbar({ isOpen, onToggle, projectId, projectName, onToggl
                             variant="ghost" 
                             size="sm" 
                             onClick={onToggleAi}
-                            className="h-7 gap-2 border border-accent-primary/20 bg-accent-primary-dim px-3 text-accent-primary hover:bg-accent-primary/20 hover:text-accent-primary"
+                            className="h-7 gap-2 border-[1.5px] border-accent-primary/20 bg-accent-primary-dim px-3 text-accent-primary hover:bg-accent-primary/20 hover:text-accent-primary"
                         >
                             <Sparkles className="h-3.5 w-3.5" />
                             <span className="text-xs font-semibold">AI</span>
                         </Button>
                     </>
                 )}
-                <UserButton />
+                {mounted ? (
+                    <UserButton />
+                ) : (
+                    <div className="h-7 w-7 animate-pulse rounded-full bg-border-subtle" />
+                )}
             </div>
 
             {projectId && (
