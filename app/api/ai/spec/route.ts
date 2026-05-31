@@ -34,6 +34,9 @@ export async function POST(req: Request) {
     });
 
     // Create TaskRun record for ownership verification later
+    if (!prisma) {
+      throw new Error("DATABASE_URL is not set");
+    }
     await prisma.taskRun.create({
       data: {
         runId: handle.id,
