@@ -1,4 +1,4 @@
-import { task } from "@trigger.dev/sdk/v3";
+import { task } from "@trigger.dev/sdk";
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateText } from "ai";
 import { z } from "zod";
@@ -27,6 +27,10 @@ export const generateSpec = task({
     console.log("Generate spec task started:", validated.roomId);
 
     const broadcastStatus = async (text: string, active = true) => {
+      if (!liveblocks) {
+        console.warn("Liveblocks client missing, skipping broadcastStatus");
+        return;
+      }
       try {
         await liveblocks.broadcastEvent(validated.roomId, {
           type: "ai-status",
@@ -282,6 +286,9 @@ Please generate the full technical specification now.`,
       });
 
       // Save to database
+      if (!prisma) {
+        throw new Error("DATABASE_URL is required for this task");
+      }
       const now = new Date();
       await prisma.projectSpec.create({
         data: {

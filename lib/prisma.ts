@@ -6,7 +6,10 @@ const createPrismaClient = () => {
   const connectionString = process.env.DATABASE_URL;
 
   if (!connectionString) {
-    throw new Error("DATABASE_URL is not set");
+    if (process.env.NODE_ENV === "production" && !process.env.TRIGGER_PROJECT_REF) {
+      throw new Error("DATABASE_URL is not set");
+    }
+    return null as unknown as PrismaClient;
   }
 
   if (connectionString.startsWith("prisma+postgres://")) {
