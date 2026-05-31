@@ -77,7 +77,8 @@ export async function checkProjectAccess(projectId: string, identityParam?: { us
   if (!userId) return null
 
   // 1. Fetch project first to check ownership (fast, no currentUser needed)
-  const project = await prisma.project.findUnique({
+  if (!prisma) return null;
+  const project = await prisma!.project.findUnique({
     where: { id: projectId },
   })
 
@@ -95,7 +96,7 @@ export async function checkProjectAccess(projectId: string, identityParam?: { us
   const email = identity.email
 
   // Check if collaborator (already fetched project but we need to check collaborators)
-  const collaborator = await prisma.projectCollaborator.findUnique({
+  const collaborator = await prisma!.projectCollaborator.findUnique({
     where: {
       projectId_email: {
         projectId,

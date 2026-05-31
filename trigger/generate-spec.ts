@@ -32,7 +32,7 @@ export const generateSpec = task({
         return;
       }
       try {
-        await liveblocks.broadcastEvent(validated.roomId, {
+        await liveblocks!.broadcastEvent(validated.roomId, {
           type: "ai-status",
           text,
           active,
@@ -290,7 +290,7 @@ Please generate the full technical specification now.`,
         throw new Error("DATABASE_URL is required for this task");
       }
       const now = new Date();
-      await prisma.projectSpec.create({
+      await prisma!.projectSpec.create({
         data: {
           id: specId,
           projectId: validated.projectId,

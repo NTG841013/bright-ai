@@ -18,6 +18,7 @@ export default defineConfig({
   build: {
     extensions: [
       prismaExtension({
+        mode: "legacy",
         schema: "prisma/schema.prisma",
         directUrlEnvVarName: "DIRECT_URL",
       }),

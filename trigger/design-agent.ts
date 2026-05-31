@@ -36,11 +36,11 @@ export const designTask = task({
         if (!liveblocks) {
           throw new Error("LIVEBLOCKS_SECRET_KEY is required for this task");
         }
-        const room = await liveblocks.getRoom(payload.roomId);
+        const room = await liveblocks!.getRoom(payload.roomId);
         console.log(`Liveblocks Room verified: ${room.id}`);
         
         // Force a total reset of the storage keys for nodes and edges
-        await liveblocks.mutateStorage(payload.roomId, ({ root }: { root: any }) => {
+        await liveblocks!.mutateStorage(payload.roomId, ({ root }: { root: any }) => {
           let nodes = root.get("nodes");
           if (!nodes) {
             root.set("nodes", new LiveMap());
@@ -80,12 +80,12 @@ export const designTask = task({
         });
 
         // 2b. Re-verify storage state immediately after clearing (diagnostic)
-        const storageAfterClear = await liveblocks.getStorageDocument(payload.roomId, "json");
+        const storageAfterClear = await liveblocks!.getStorageDocument(payload.roomId, "json");
         console.log(`Diagnostic: Room storage after clear mutation: ${JSON.stringify(storageAfterClear)}`);
       } catch (e: any) {
         if (e.status === 404) {
           console.warn(`Room ${payload.roomId} not found in Liveblocks. Creating...`);
-          await liveblocks.createRoom(payload.roomId, { defaultAccesses: [] });
+          await liveblocks!.createRoom(payload.roomId, { defaultAccesses: [] });
         } else {
           console.error(`Error verifying Liveblocks room:`, e);
           throw e; // Rethrow other errors
@@ -314,7 +314,7 @@ export const designTask = task({
 
       console.log(`Liveblocks mutateStorage called for room: ${payload.roomId}`);
       try {
-        await liveblocks.mutateStorage(payload.roomId, ({ root }: { root: any }) => {
+        await liveblocks!.mutateStorage(payload.roomId, ({ root }: { root: any }) => {
           console.log("Inside mutateStorage callback");
           
           let nodes = root.get("nodes");
@@ -472,16 +472,16 @@ export const designTask = task({
         console.log("mutateStorage promise resolved");
 
         // Diagnostic check after mutation
-        const storageAfterMutate = await liveblocks.getStorageDocument(payload.roomId, "json");
+        const storageAfterMutate = await liveblocks!.getStorageDocument(payload.roomId, "json");
         console.log(`Diagnostic: Room storage after main mutation: ${JSON.stringify(storageAfterMutate)}`);
       } catch (mutationError) {
         console.error("Error during liveblocks.mutateStorage:", mutationError);
       }
 
       await broadcastStatus("Design generation complete!", "complete", false);
-
+ 
       // Force broadcast an event to notify frontend that storage has changed significantly
-      await liveblocks.broadcastEvent(payload.roomId, {
+      await liveblocks!.broadcastEvent(payload.roomId, {
         type: "ai-status",
         text: "Architecture applied to canvas.",
         active: false,
