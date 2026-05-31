@@ -41,17 +41,17 @@ export const designTask = task({
         
         // Force a total reset of the storage keys for nodes and edges
         await liveblocks!.mutateStorage(payload.roomId, ({ root }: { root: any }) => {
-          let nodes = root.get("nodes");
-          if (!nodes) {
-            root.set("nodes", new LiveMap());
-            nodes = root.get("nodes");
+          let flow = root.get("flow");
+          if (!flow) {
+            root.set("flow", new LiveObject({
+              nodes: new LiveMap(),
+              edges: new LiveMap(),
+            }));
+            flow = root.get("flow");
           }
 
-          let edges = root.get("edges");
-          if (!edges) {
-            root.set("edges", new LiveMap());
-            edges = root.get("edges");
-          }
+          const nodes = flow.get("nodes");
+          const edges = flow.get("edges");
 
           if (nodes) {
             // Defensive clear: some environments might not support .clear()
@@ -74,9 +74,7 @@ export const designTask = task({
             }
           }
           
-          // Clean up old flow object if it exists to prevent confusion
-          root.delete("flow");
-          console.log("Storage: root level maps cleared for fresh design");
+          console.log("Storage: flow.nodes and flow.edges cleared for fresh design");
         });
 
         // 2b. Re-verify storage state immediately after clearing (diagnostic)
@@ -317,19 +315,18 @@ export const designTask = task({
         await liveblocks!.mutateStorage(payload.roomId, ({ root }: { root: any }) => {
           console.log("Inside mutateStorage callback");
           
-          let nodes = root.get("nodes");
-          if (!nodes) {
-            console.log("Storage: 'nodes' missing, creating...");
-            root.set("nodes", new LiveMap());
-            nodes = root.get("nodes");
+          let flow = root.get("flow");
+          if (!flow) {
+            console.log("Storage: 'flow' missing, creating...");
+            root.set("flow", new LiveObject({
+              nodes: new LiveMap(),
+              edges: new LiveMap(),
+            }));
+            flow = root.get("flow");
           }
 
-          let edges = root.get("edges");
-          if (!edges) {
-            console.log("Storage: 'edges' missing, creating...");
-            root.set("edges", new LiveMap());
-            edges = root.get("edges");
-          }
+          const nodes = flow.get("nodes");
+          const edges = flow.get("edges");
 
           let chatMessages = root.get("chatMessages");
           if (!chatMessages) {

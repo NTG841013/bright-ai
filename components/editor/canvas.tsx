@@ -296,12 +296,18 @@ function CanvasInner() {
 
     // Add template nodes
     for (const node of template.nodes) {
-      nodesMap.set(node.id, new LiveObject(node as any));
+      nodesMap.set(node.id, new LiveObject({
+        ...node,
+        data: new LiveObject(node.data),
+      } as any));
     }
 
     // Add template edges
     for (const edge of template.edges) {
-      edgesMap.set(edge.id, new LiveObject(edge as any));
+      edgesMap.set(edge.id, new LiveObject({
+        ...edge,
+        data: new LiveObject(edge.data || {}),
+      } as any));
     }
   }, []);
 
