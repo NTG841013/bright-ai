@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth as triggerAuth } from "@trigger.dev/sdk/v3";
+import { auth as triggerAuth } from "@trigger.dev/sdk";
 import { prisma } from "@/lib/prisma";
 import { getClerkIdentity } from "@/lib/project-access";
 

@@ -3,16 +3,20 @@ import { Liveblocks } from "@liveblocks/node";
 const rawSecret = process.env.LIVEBLOCKS_SECRET_KEY;
 const secret = rawSecret?.trim();
 
-if (!secret) {
-  throw new Error("Missing LIVEBLOCKS_SECRET_KEY environment variable");
-}
-
 /**
  * Cached Liveblocks node client
  */
-export const liveblocks = new Liveblocks({
-  secret,
-});
+export const liveblocks = secret
+  ? new Liveblocks({
+      secret,
+    })
+  : null;
+
+if (!liveblocks && process.env.NODE_ENV === "production") {
+  console.warn(
+    "Warning: LIVEBLOCKS_SECRET_KEY is missing. Liveblocks features will be disabled."
+  );
+}
 
 /**
  * Deterministically maps a user ID to a consistent color from a mixed palette.

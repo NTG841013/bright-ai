@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { tasks } from "@trigger.dev/sdk";
 import { prisma } from "@/lib/prisma";
 import { checkProjectAccess, getClerkIdentity } from "@/lib/project-access";
 import { designTask } from "@/trigger/design-agent";

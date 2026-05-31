@@ -4,7 +4,7 @@ import { prismaExtension } from "@trigger.dev/build/extensions/prisma";
 export default defineConfig({
   project: process.env.TRIGGER_PROJECT_REF!,
   dirs: ["trigger"],
-  runtime: "node",
+  runtime: "node-22",
   maxDuration: 3600,
   retries: {
     enabledInDev: false,
@@ -18,8 +18,8 @@ export default defineConfig({
   build: {
     extensions: [
       prismaExtension({
-        mode: "legacy",
         schema: "prisma/schema.prisma",
+        directUrlEnvVarName: "DIRECT_URL",
       }),
     ],
   },

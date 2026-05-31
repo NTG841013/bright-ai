@@ -1,4 +1,4 @@
-import { task } from "@trigger.dev/sdk/v3";
+import { task } from "@trigger.dev/sdk";
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateText, tool } from "ai";
 import { z } from "zod";
@@ -12,6 +12,10 @@ export const designTask = task({
     console.log("Design task started:", payload);
 
     const broadcastStatus = async (text: string, status: "start" | "processing" | "complete" | "error", active = true) => {
+      if (!liveblocks) {
+        console.warn("Liveblocks client missing, skipping broadcastStatus");
+        return;
+      }
       await liveblocks.broadcastEvent(payload.roomId, {
         type: "ai-status",
         text,
@@ -29,6 +33,9 @@ export const designTask = task({
 
       // Verify Liveblocks Room Existence and CLEAR IT for a fresh design
       try {
+        if (!liveblocks) {
+          throw new Error("LIVEBLOCKS_SECRET_KEY is required for this task");
+        }
         const room = await liveblocks.getRoom(payload.roomId);
         console.log(`Liveblocks Room verified: ${room.id}`);
         
