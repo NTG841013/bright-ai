@@ -382,7 +382,7 @@ export const designTask = task({
                     id: nodeId,
                     type: "canvasNode",
                     position: args.position || { x: 0, y: 0 },
-                    data: nodeData,
+                    data: new LiveObject(nodeData),
                   });
                   
                   nodes.set(nodeId, newNode);
@@ -450,7 +450,7 @@ export const designTask = task({
                     type: "canvasEdge",
                     source: args.source,
                     target: args.target,
-                    data: { label: args.label || "" },
+                    data: new LiveObject({ label: args.label || "" }),
                   }));
                   edgesCreated++;
                   break;
