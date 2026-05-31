@@ -42,4 +42,14 @@ Background tasks are deployed independently of Vercel. To automate this:
 2. Add it as a secret named `TRIGGER_ACCESS_TOKEN` in your GitHub repository settings.
 3. The included GitHub Action (`.github/workflows/trigger-deploy.yml`) will automatically deploy your tasks on push to `main` and create preview environments for Pull Requests.
 
+#### Required Secrets in Trigger.dev Dashboard
+
+Ensure the following environment variables are added to your **Trigger.dev Dashboard** (Production/Staging):
+
+- `BLOB_READ_WRITE_TOKEN`: Your Vercel Blob token.
+- `LIVEBLOCKS_SECRET_KEY`: Your Liveblocks secret key.
+- `DATABASE_URL`: Your Prisma database connection string.
+- `DIRECT_URL`: The same as `DATABASE_URL` for Prisma Postgres.
+- `OPENROUTER_API_KEY`: Your OpenRouter API key for AI features.
+
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
