@@ -16,6 +16,9 @@ export async function POST(req: Request) {
     }
 
     // Verify ownership using TaskRun record
+    if (!prisma) {
+      throw new Error("DATABASE_URL is not set");
+    }
     const taskRun = await prisma.taskRun.findUnique({
       where: { runId },
     });

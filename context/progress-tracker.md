@@ -68,6 +68,7 @@ Update this file whenever the current phase, active feature, or implementation s
 - Fixed "Nothing on Canvas" Issue: Updated `trigger/design-agent.ts` to correctly nest generated nodes and edges under the `flow` object in Liveblocks storage, matching the project's data structure. ✓
 - Enhanced Storage Sync: Updated `components/editor/canvas.tsx` to properly wrap nested node and edge `data` properties in `LiveObject` when importing templates, ensuring consistent synchronization with the frontend. ✓
 - Fixed Spec Generation Failure (Vercel Blob): Identified that the `generate-spec` task was failing due to a missing `BLOB_READ_WRITE_TOKEN` in the Trigger.dev dashboard. Added a defensive check and updated documentation. ✓
+- Resolved `TypeError: Cannot read properties of undefined (reading 'create')` in `generate-spec.ts`: Fixed the incorrect `prisma` type in `lib/prisma.ts` which was causing TypeScript to allow unsafe access to a nullable singleton. Verified the fix and re-added defensive runtime checks. ✓
 
 ## Completed
 

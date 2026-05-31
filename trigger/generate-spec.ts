@@ -290,10 +290,10 @@ Please generate the full technical specification now.`,
       });
 
       // Save to database
+      const now = new Date();
       if (!prisma) {
         throw new Error("DATABASE_URL is required for this task");
       }
-      const now = new Date();
       await prisma!.projectSpec.create({
         data: {
           id: specId,
