@@ -62,6 +62,9 @@ Update this file whenever the current phase, active feature, or implementation s
 - Configured Prisma Extension in Trigger.dev: Added `directUrlEnvVarName: "DIRECT_URL"` to `prismaExtension` in `trigger.config.ts` to ensure database connections work correctly during task execution. ✓
 - Fixed Task Indexing Failure (Missing Environment Variables): Modified `lib/liveblocks.ts` and `lib/prisma.ts` to avoid throwing errors if `LIVEBLOCKS_SECRET_KEY` or `DATABASE_URL` is missing during task indexing. Added defensive checks in `trigger/design-agent.ts` and `trigger/generate-spec.ts` to handle the absence of these clients gracefully during deployment while still requiring them for actual task execution. ✓
 - Fixed Vercel Build Failure (TypeScript): Resolved `'liveblocks' is possibly 'null'` error in `app/api/liveblocks-auth/route.ts` caused by nullable `liveblocks` client. Added a null check and 503 response if the client is not initialized. ✓
+- Resolved Trigger.dev CI Deployment Error: Identified that the GitHub Action failed due to a missing `TRIGGER_ACCESS_TOKEN`. Verified that the workflow is correctly configured and updated the README with instructions for the user to add the missing secret to GitHub. ✓
+- Fixed Vercel and local build failure (TypeScript): Added null guards and non-null assertions for `liveblocks` and `prisma` clients across Trigger.dev tasks and shared library functions. This was necessary after these clients were made nullable to support Trigger.dev deployment indexing without environment variables. ✓
+- Resolved `trigger.config.ts` build error: Re-added missing `mode: "legacy"` to `prismaExtension` in `trigger.config.ts` to satisfy v4 configuration requirements. ✓
 
 ## Completed
 
