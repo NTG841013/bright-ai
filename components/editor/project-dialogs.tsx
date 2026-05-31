@@ -23,7 +23,7 @@ function toSlug(name: string): string {
 }
 
 const dialogContentClass =
-  "bg-elevated text-text-primary ring-border-default"
+  "bg-elevated text-text-primary ring-border-default sm:max-w-md"
 
 const dialogFooterClass =
   "bg-transparent border-border-default"

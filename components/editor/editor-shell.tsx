@@ -11,6 +11,7 @@ import { EditorHome } from "./editor-home"
 import { AiSidebar } from "./ai-sidebar"
 import { useProjectActions } from "@/hooks/use-project-actions"
 import type { Project } from "@prisma/client"
+import { useCanvas, CanvasProvider } from "./canvas-context"
 
 interface EditorShellProps {
   children?: React.ReactNode
@@ -20,15 +21,17 @@ interface EditorShellProps {
   isOwner?: boolean
 }
 
-export function EditorShell({
+function EditorShellContent({
   children,
   ownedProjects,
   sharedProjects,
   activeProject,
   isOwner = false,
 }: EditorShellProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [aiSidebarOpen, setAiSidebarOpen] = useState(false)
+  const canvas = useCanvas()
+  const sidebarOpen = canvas?.projectSidebarOpen ?? false
+  const setSidebarOpen = canvas?.setProjectSidebarOpen ?? (() => {})
+  
   const projectActions = useProjectActions()
 
   return (
@@ -36,10 +39,9 @@ export function EditorShell({
       <ReactFlowProvider>
         <EditorNavbar
           isOpen={sidebarOpen}
-          onToggle={() => setSidebarOpen((o) => !o)}
+          onToggle={() => setSidebarOpen(!sidebarOpen)}
           projectId={activeProject?.id}
           projectName={activeProject?.name}
-          onToggleAi={() => setAiSidebarOpen((o) => !o)}
           isOwner={isOwner}
         />
         <main className="relative flex flex-1 overflow-hidden p-3">
@@ -58,15 +60,16 @@ export function EditorShell({
           <div className="flex-1 overflow-hidden rounded-2xl border-[1.5px] border-border-subtle bg-bg-surface/50 shadow-sm relative">
             {children ?? <EditorHome onNewProject={projectActions.openCreate} />}
           </div>
-          
-          {activeProject && (
-            <AiSidebar 
-              isOpen={aiSidebarOpen} 
-              onClose={() => setAiSidebarOpen(false)} 
-            />
-          )}
         </main>
       </ReactFlowProvider>
     </div>
+  )
+}
+
+export function EditorShell(props: EditorShellProps) {
+  return (
+    <CanvasProvider>
+      <EditorShellContent {...props} />
+    </CanvasProvider>
   )
 }

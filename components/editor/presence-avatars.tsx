@@ -12,55 +12,59 @@ export function PresenceAvatars() {
   // the spec explicitly asks to filter to exclude any entry whose user ID matches the current Clerk user ID)
   const collaborators = others.filter((other) => other.id !== self?.id)
   
-  const hasCollaborators = collaborators.length > 0
-  const displayCollaborators = collaborators.slice(0, 5)
-  const overflowCount = collaborators.length - 5
+  // Deduplicate by user ID to avoid duplicate key errors when a user has multiple tabs open
+  const uniqueCollaborators = collaborators.filter((other, index, array) => 
+    array.findIndex(u => u.id === other.id) === index
+  )
+  
+  const hasCollaborators = uniqueCollaborators.length > 0
+  const displayCollaborators = uniqueCollaborators.slice(0, 5)
+  const overflowCount = Math.max(0, uniqueCollaborators.length - 5)
 
   return (
-    <div className="absolute top-4 right-4 z-50 flex items-center gap-4">
+    <div className="absolute top-4 right-4 z-50 flex items-center bg-bg-surface border-[1.5px] border-border-subtle rounded-full px-2 py-1.5 shadow-sm">
       <div className="flex items-center">
         {hasCollaborators && (
-          <div className="flex -space-x-2 mr-4">
-            {displayCollaborators.map((other) => (
-              <div
-                key={other.id}
-                className="relative h-8 w-8 rounded-full border-2 border-[#0a0a0a] bg-bg-surface ring-1 ring-white/10 overflow-hidden"
-                title={other.info.name}
-              >
-                {other.info.avatar ? (
-                  <img
-                    src={other.info.avatar}
-                    alt={other.info.name}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div 
-                    className="flex h-full w-full items-center justify-center text-[10px] font-bold text-white"
-                    style={{ backgroundColor: other.info.color }}
-                  >
-                    {other.info.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")
-                      .toUpperCase()
-                      .slice(0, 2)}
-                  </div>
-                )}
-              </div>
-            ))}
-            {overflowCount > 0 && (
-              <div className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#0a0a0a] bg-bg-elevated ring-1 ring-white/10 text-[10px] font-bold text-text-primary">
-                +{overflowCount}
-              </div>
-            )}
-          </div>
+          <>
+            <div className="flex -space-x-2 mr-4">
+              {displayCollaborators.map((other) => (
+                <div
+                  key={other.id}
+                  className="relative h-8 w-8 rounded-full border-2 border-bg-surface bg-bg-surface ring-1 ring-white/10 overflow-hidden"
+                  title={other.info.name}
+                >
+                  {other.info.avatar ? (
+                    <img
+                      src={other.info.avatar}
+                      alt={other.info.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div 
+                      className="flex h-full w-full items-center justify-center text-[10px] font-bold text-white"
+                      style={{ backgroundColor: other.info.color }}
+                    >
+                      {other.info.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()
+                        .slice(0, 2)}
+                    </div>
+                  )}
+                </div>
+              ))}
+              {overflowCount > 0 && (
+                <div className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-bg-surface bg-bg-elevated ring-1 ring-white/10 text-[10px] font-bold text-text-primary">
+                  +{overflowCount}
+                </div>
+              )}
+            </div>
+            <div className="h-4 w-[1px] bg-border-subtle mr-4" />
+          </>
         )}
-
-        {hasCollaborators && (
-          <div className="h-4 w-[1px] bg-border-subtle mr-4" />
-        )}
-
-        <div className="h-8 w-8 rounded-full ring-1 ring-white/10 flex items-center justify-center">
+        
+        <div className="h-8 w-8 rounded-full ring-1 ring-white/10 flex items-center justify-center overflow-hidden">
           <UserButton 
              appearance={{
                 elements: {

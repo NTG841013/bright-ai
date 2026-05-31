@@ -1,3 +1,7 @@
+import { LiveMap, LiveObject, LiveList } from "@liveblocks/client";
+import { CanvasNode, CanvasEdge } from "./types/canvas";
+import { AiRoomEvent, AiChatMessage } from "./types/tasks";
+
 // Define Liveblocks types for your application
 // https://liveblocks.io/docs/api-reference/liveblocks-react#Typing-your-data
 declare global {
@@ -10,8 +14,11 @@ declare global {
 
     // The Storage tree for the room, for useMutation, useStorage, etc.
     Storage: {
-      // Example, a conflict-free list
-      // animals: LiveList<string>;
+      flow: LiveObject<{
+        nodes: LiveMap<string, LiveObject<any>>;
+        edges: LiveMap<string, LiveObject<any>>;
+      }>;
+      chatMessages: LiveList<LiveObject<AiChatMessage>>;
     };
 
     // Custom user info set when authenticating with a secret key
@@ -19,13 +26,13 @@ declare global {
       id: string;
       info: {
         name: string;
-        avatar: string;
+        avatar?: string;
         color: string;
       };
     };
 
     // Custom events, for useBroadcastEvent, useEventListener
-    RoomEvent: {};
+    RoomEvent: AiRoomEvent;
 
     // Custom metadata set on threads, for useThreads, useCreateThread, etc.
     ThreadMetadata: {

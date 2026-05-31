@@ -3,42 +3,40 @@ import { liveblocks, getUserColor } from "@/lib/liveblocks";
 import { checkProjectAccess, getClerkIdentity } from "@/lib/project-access";
 
 export async function POST(request: NextRequest) {
-  // 1. Require Clerk authentication
-  const identity = await getClerkIdentity();
-  if (!identity) {
-    return new NextResponse("Unauthorized", { status: 403 });
-  }
-
-  // 2. Parse room ID from request body
+  // 1. Parse room ID from request body
   let room: string;
   try {
     const body = await request.json();
     const roomValue = body.room;
 
     if (typeof roomValue !== "string") {
-      return new NextResponse("Invalid room ID", { status: 400 });
+      return NextResponse.json({ message: "Invalid room ID" }, { status: 400 });
     }
 
     room = roomValue.trim();
   } catch (e) {
-    return new NextResponse("Invalid request body", { status: 400 });
+    return NextResponse.json({ message: "Invalid request body" }, { status: 400 });
   }
   
   if (!room) {
-    return new NextResponse("Missing room ID", { status: 400 });
+    return NextResponse.json({ message: "Missing room ID" }, { status: 400 });
   }
 
-  // 3. Verify project access using the existing access helper
-  const project = await checkProjectAccess(room, identity);
-
+  // 2. Verify project access using fast-path check
+  const project = await checkProjectAccess(room);
   if (!project) {
-    // Return 403 for unauthorized project access as specified
-    return new NextResponse("Unauthorized", { status: 403 });
+    return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+  }
+
+  // 3. Get full identity for Liveblocks userInfo
+  const identity = await getClerkIdentity();
+  if (!identity) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
   const userId = identity.userId;
   const name = `${identity.firstName ?? ""} ${identity.lastName ?? ""}`.trim() || "Anonymous";
-  const avatar = identity.imageUrl || ""; // Ensure string type for Liveblocks
+  const avatar = identity.imageUrl || undefined;
   const color = getUserColor(userId);
 
   // 4. Ensure the Liveblocks room exists (create if needed) using getOrCreateRoom for atomicity
@@ -69,6 +67,6 @@ export async function POST(request: NextRequest) {
     return new NextResponse(body, { status });
   } catch (error) {
     console.error("Liveblocks session error:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

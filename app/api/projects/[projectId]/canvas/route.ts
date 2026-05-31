@@ -23,11 +23,12 @@ export async function PUT(
     const canvasData = await request.json()
     const fileName = `projects/${projectId}/canvas.json`
     
-    // Upload JSON to Vercel Blob
+    // Upload JSON to Vercel Blob with stable key and overwrite enabled
     const blob = await put(fileName, JSON.stringify(canvasData), {
       access: "private",
       contentType: "application/json",
-      addRandomSuffix: true, // Good for cache busting if needed, but we store the URL
+      addRandomSuffix: false,
+      allowOverwrite: true,
     })
 
     // Update Prisma with the blob URL

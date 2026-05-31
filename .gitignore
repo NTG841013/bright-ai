@@ -44,5 +44,7 @@ next-env.d.ts
 # local tooling
 .claude/
 .idea/
+.trigger/
+.output.txt
 
 /app/generated/prisma

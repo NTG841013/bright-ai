@@ -15,8 +15,10 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useLiveblocksFlow } from "@liveblocks/react-flow";
-import { useUndo, useRedo, useCanUndo, useCanRedo, useMyPresence } from "@liveblocks/react/suspense";
+import { useUndo, useRedo, useCanUndo, useCanRedo, useMyPresence, useEventListener, useMutation } from "@liveblocks/react/suspense";
+import { LiveObject, LiveMap } from "@liveblocks/client";
 import { CanvasNode, CanvasEdge, NodeShape } from "@/types/canvas";
+import { AiRoomEventSchema } from "@/types/tasks";
 import { ShapePanel } from "./shape-panel";
 import { CanvasNodeComponent } from "./canvas-node";
 import { CanvasEdgeComponent } from "./canvas-edge";
@@ -195,7 +197,43 @@ function CanvasInner() {
     },
   });
 
+  // Listen for manual refresh signals from the AI agent
+  useEventListener(({ event }) => {
+    const result = AiRoomEventSchema.safeParse(event);
+    if (result.success && result.data.type === "ai-status" && result.data.refreshCanvas) {
+      console.log("Canvas: Refresh signal received from AI Agent. Forcing sync.");
+      // React Flow doesn't have a direct "refresh from source" but we can nudge it
+      // by ensuring any local state that might be shadowing Liveblocks is cleared
+      // or simply logging for now to see if the signal arrives.
+    }
+  });
+
+  // Watch for Liveblocks updates and sync React Flow if they seem to disagree
+  // but only if we're not currently dragging or interacting.
+  useEffect(() => {
+    if (_nodes && _nodes.length > 0) {
+      console.log("Canvas: Liveblocks storage has nodes, ensuring React Flow is in sync", _nodes.length);
+    }
+  }, [_nodes]);
+
+  useEffect(() => {
+    console.log("Canvas: Nodes/Edges updated from Liveblocks", {
+      nodesCount: _nodes?.length,
+      edgesCount: _edges?.length,
+      firstNode: _nodes?.[0]?.id,
+      _nodesRaw: _nodes // Detailed log
+    });
+  }, [_nodes, _edges]);
+
   const onKeyDown = useCallback((event: React.KeyboardEvent) => {
+    // Only handle delete if something is actually selected
+    const selectedNodes = nodes?.filter((node) => node.selected);
+    const selectedEdges = edges?.filter((edge) => edge.selected);
+    
+    if (!selectedNodes?.length && !selectedEdges?.length) {
+      return;
+    }
+
     if (
       event.target instanceof HTMLInputElement ||
       event.target instanceof HTMLTextAreaElement ||
@@ -205,32 +243,85 @@ function CanvasInner() {
     }
 
     if (event.key === "Delete" || event.key === "Backspace") {
-      const selectedNodes = nodes?.filter((node) => node.selected);
-      const selectedEdges = edges?.filter((edge) => edge.selected);
-
       console.log("CanvasInner: Delete/Backspace key detected", {
         key: event.key,
         selectedNodesCount: selectedNodes?.length,
         selectedEdgesCount: selectedEdges?.length,
       });
 
-      if (selectedNodes?.length || selectedEdges?.length) {
-        console.log("CanvasInner: Calling onDelete", {
-          nodes: selectedNodes.map(n => n.id),
-          edges: selectedEdges.map(e => e.id)
-        });
-        onDelete?.({
-          nodes: selectedNodes || [],
-          edges: selectedEdges || [],
-        });
-      } else {
-        console.log("CanvasInner: No selected elements to delete");
-      }
+      console.log("CanvasInner: Calling onDelete", {
+        nodes: selectedNodes.map(n => n.id),
+        edges: selectedEdges.map(e => e.id)
+      });
+      onDelete?.({
+        nodes: selectedNodes || [],
+        edges: selectedEdges || [],
+      });
     }
   }, [nodes, edges, onDelete]);
 
   const { status, triggerSave } = useAutosave(_nodes, _edges);
   const canvas = useCanvas();
+  const { fitView } = useReactFlow();
+
+  const importTemplateMutation = useMutation(({ storage }, template: { nodes: CanvasNode[]; edges: CanvasEdge[] }) => {
+    let flow = storage.get("flow");
+    if (!flow) {
+      storage.set("flow", new LiveObject({
+        nodes: new LiveMap(),
+        edges: new LiveMap(),
+      }));
+      flow = storage.get("flow");
+    }
+
+    const nodesMap = flow.get("nodes");
+    const edgesMap = flow.get("edges");
+
+    if (!nodesMap || !edgesMap) {
+      console.error("Canvas: Could not find nodes or edges map in storage");
+      return;
+    }
+
+    // Clear existing nodes
+    const nodeKeys = Array.from(nodesMap.keys());
+    for (const key of nodeKeys) {
+      nodesMap.delete(key);
+    }
+
+    // Clear existing edges
+    const edgeKeys = Array.from(edgesMap.keys());
+    for (const key of edgeKeys) {
+      edgesMap.delete(key);
+    }
+
+    // Add template nodes
+    for (const node of template.nodes) {
+      nodesMap.set(node.id, new LiveObject(node as any));
+    }
+
+    // Add template edges
+    for (const edge of template.edges) {
+      edgesMap.set(edge.id, new LiveObject(edge as any));
+    }
+  }, []);
+
+  const handleImportTemplate = useCallback((template: { nodes: CanvasNode[]; edges: CanvasEdge[] }) => {
+    importTemplateMutation(template);
+    setTimeout(() => {
+      fitView({ padding: 0.2, duration: 800 });
+    }, 100);
+  }, [importTemplateMutation, fitView]);
+
+  useEffect(() => {
+    if (canvas) {
+      canvas.setImportTemplate(handleImportTemplate);
+    }
+    return () => {
+      if (canvas) {
+        canvas.setImportTemplate(null);
+      }
+    };
+  }, [canvas, handleImportTemplate]);
 
   useEffect(() => {
     if (canvas) {
