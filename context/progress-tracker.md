@@ -67,6 +67,7 @@ Update this file whenever the current phase, active feature, or implementation s
 - Resolved `trigger.config.ts` build error: Re-added missing `mode: "legacy"` to `prismaExtension` in `trigger.config.ts` to satisfy v4 configuration requirements. ✓
 - Fixed "Nothing on Canvas" Issue: Updated `trigger/design-agent.ts` to correctly nest generated nodes and edges under the `flow` object in Liveblocks storage, matching the project's data structure. ✓
 - Enhanced Storage Sync: Updated `components/editor/canvas.tsx` to properly wrap nested node and edge `data` properties in `LiveObject` when importing templates, ensuring consistent synchronization with the frontend. ✓
+- Fixed Spec Generation Failure (Vercel Blob): Identified that the `generate-spec` task was failing due to a missing `BLOB_READ_WRITE_TOKEN` in the Trigger.dev dashboard. Added a defensive check and updated documentation. ✓
 
 ## Completed
 

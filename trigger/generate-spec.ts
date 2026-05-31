@@ -275,8 +275,12 @@ Please generate the full technical specification now.`,
       });
 
       await broadcastStatus("Saving specification...", true);
-
+ 
       // Upload to Vercel Blob
+      if (!process.env.BLOB_READ_WRITE_TOKEN) {
+        throw new Error("BLOB_READ_WRITE_TOKEN is required for this task");
+      }
+
       const specId = randomUUID();
       const filename = `specs/${validated.projectId}/${specId}.md`;
       const blob = await put(filename, text, {
