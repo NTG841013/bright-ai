@@ -1,6 +1,7 @@
 "use client"
 
 import { useOthers } from "@liveblocks/react/suspense"
+import { Loader2 } from "lucide-react"
 
 export function LiveCursors() {
   const others = useOthers()
@@ -17,6 +18,7 @@ export function LiveCursors() {
             x={presence.cursor.x}
             y={presence.cursor.y}
             name={info.name}
+            thinking={presence.thinking}
           />
         )
       })}
@@ -24,7 +26,7 @@ export function LiveCursors() {
   )
 }
 
-function Cursor({ color, x, y, name }: { color: string; x: number; y: number; name: string }) {
+function Cursor({ color, x, y, name, thinking }: { color: string; x: number; y: number; name: string; thinking?: boolean }) {
   return (
     <div
       className="pointer-events-none absolute left-0 top-0 z-[100]"
@@ -46,10 +48,11 @@ function Cursor({ color, x, y, name }: { color: string; x: number; y: number; na
         />
       </svg>
       <div
-        className="ml-4 rounded-md px-2 py-1 text-xs font-semibold text-white shadow-sm"
+        className="ml-4 flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold text-white shadow-sm"
         style={{ backgroundColor: color }}
       >
-        {name}
+        {thinking && <Loader2 className="h-3 w-3 animate-spin" />}
+        <span>{name}</span>
       </div>
     </div>
   )

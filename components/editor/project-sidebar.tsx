@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import type { Project } from "@prisma/client"
+import { Logo } from "@/components/ui/logo"
 
 interface ProjectSidebarProps {
   isOpen: boolean
@@ -42,29 +43,37 @@ export function ProjectSidebar({
 
       <aside
         className={cn(
-          "absolute top-3 left-3 bottom-3 z-30 flex w-72 flex-col rounded-2xl border-[1.5px] border-border-subtle bg-bg-surface/90 shadow-2xl backdrop-blur-md transition-all duration-300 overflow-hidden",
+          "absolute top-3 left-3 bottom-3 z-30 flex w-[340px] flex-col rounded-2xl border-[1.5px] border-border-subtle bg-bg-surface/95 shadow-2xl backdrop-blur-md transition-all duration-300 overflow-hidden",
           isOpen ? "translate-x-0 opacity-100" : "-translate-x-[calc(100%+24px)] opacity-0"
         )}
       >
         <div className="flex h-12 shrink-0 items-center justify-between border-b-[1.5px] border-border-subtle px-4">
-          <span className="text-sm font-medium text-text-primary">Projects</span>
-          <Button variant="ghost" size="icon-sm" onClick={onClose}>
+          <Link href="/" className="flex items-center">
+            <Logo className="h-6 w-6" showText={false} />
+            <span className="ml-2.5 text-sm font-medium text-text-primary">Bright AI</span>
+          </Link>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={onClose}
+            className="border-[1.5px] border-accent-primary/20 bg-accent-primary-dim text-accent-primary hover:bg-accent-primary/20 hover:text-accent-primary"
+          >
             <X className="h-4 w-4" />
             <span className="sr-only">Close sidebar</span>
           </Button>
         </div>
 
         <Tabs defaultValue="my-projects" className="flex flex-1 flex-col overflow-hidden">
-          <TabsList className="mx-3 mt-3 h-10 w-[calc(100%-1.5rem)] shrink-0 bg-bg-elevated p-1">
+          <TabsList className="mx-3 mt-3 h-10 w-[calc(100%-1.5rem)] shrink-0 rounded-lg border-[1.5px] border-accent-primary/20 bg-accent-primary-dim p-1">
             <TabsTrigger
               value="my-projects"
-              className="flex-1 rounded-lg text-xs font-medium text-text-muted transition-all data-active:bg-bg-subtle data-active:text-text-primary data-active:shadow-sm"
+              className="flex-1 rounded-lg text-sm font-medium text-accent-primary transition-all data-active:bg-accent-primary/20 data-active:text-accent-primary"
             >
               My Projects
             </TabsTrigger>
             <TabsTrigger
               value="shared"
-              className="flex-1 rounded-lg text-xs font-medium text-text-muted transition-all data-active:bg-bg-subtle data-active:text-text-primary data-active:shadow-sm"
+              className="flex-1 rounded-lg text-sm font-medium text-accent-primary transition-all data-active:bg-accent-primary/20 data-active:text-accent-primary"
             >
               Shared
             </TabsTrigger>
@@ -142,10 +151,10 @@ function ProjectItem({ project, onRename, onDelete, showActions, isActive }: Pro
     <Link
       href={`/editor/${project.id}`}
       className={cn(
-        "group/item relative flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200",
+        "group/item relative mb-1 flex items-center gap-3 rounded-lg border-[1.5px] border-accent-primary/20 px-3 py-2.5 transition-all duration-200",
         isActive 
-          ? "bg-bg-elevated text-text-primary shadow-sm border-[1.5px] border-border-subtle" 
-          : "text-text-secondary hover:bg-bg-elevated/50 hover:text-text-primary"
+          ? "bg-accent-primary/20 text-accent-primary shadow-sm" 
+          : "bg-accent-primary-dim text-accent-primary hover:bg-accent-primary/20"
       )}
     >
       {isActive && (
@@ -153,11 +162,10 @@ function ProjectItem({ project, onRename, onDelete, showActions, isActive }: Pro
       )}
       <div className={cn(
         "flex h-2 w-2 rounded-full",
-        isActive ? "bg-accent-primary" : "bg-text-muted"
+        isActive ? "bg-accent-primary" : "bg-accent-primary/40"
       )} />
       <span className={cn(
-        "flex-1 truncate text-sm font-medium",
-        isActive ? "text-text-primary" : "text-text-secondary"
+        "flex-1 truncate text-sm font-medium text-accent-primary"
       )}>
         {project.name}
       </span>
@@ -171,6 +179,7 @@ function ProjectItem({ project, onRename, onDelete, showActions, isActive }: Pro
               e.stopPropagation()
               onRename(project)
             }}
+            className="border-[1.5px] border-accent-primary/20 bg-accent-primary-dim text-accent-primary hover:bg-accent-primary/20 hover:text-accent-primary"
           >
             <Pencil className="h-3.5 w-3.5" />
             <span className="sr-only">Rename {project.name}</span>
@@ -183,6 +192,7 @@ function ProjectItem({ project, onRename, onDelete, showActions, isActive }: Pro
               e.stopPropagation()
               onDelete(project)
             }}
+            className="border-[1.5px] border-accent-primary/20 bg-accent-primary-dim text-accent-primary hover:bg-accent-primary/20 hover:text-accent-primary"
           >
             <Trash2 className="h-3.5 w-3.5" />
             <span className="sr-only">Delete {project.name}</span>

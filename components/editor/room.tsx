@@ -6,6 +6,7 @@ import {
   RoomProvider,
   ClientSideSuspense,
 } from "@liveblocks/react/suspense";
+import { LiveMap, LiveObject, LiveList } from "@liveblocks/client";
 
 interface RoomProps {
   roomId: string;
@@ -20,6 +21,13 @@ export function Room({ roomId, children }: RoomProps) {
         initialPresence={{
           cursor: null,
           thinking: false,
+        }}
+        initialStorage={{
+          flow: new LiveObject({
+            nodes: new LiveMap(),
+            edges: new LiveMap(),
+          }),
+          chatMessages: new LiveList([]),
         }}
       >
         <ClientSideSuspense fallback={<Loading />}>

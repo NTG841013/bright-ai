@@ -1,12 +1,24 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
 
 const isPublicRoute = createRouteMatcher([
-  `${process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL}(.*)`,
-  `${process.env.NEXT_PUBLIC_CLERK_SIGN_UP_URL}(.*)`,
+  "/",
+  "/sign-in(.*)",
+  "/sign-up(.*)",
 ])
 
-export const proxy = clerkMiddleware(async (auth, request) => {
+export default clerkMiddleware(async (auth, request) => {
   if (!isPublicRoute(request)) {
+    // For NON-GET requests (Server Actions, API calls), return 401 instead of redirecting to sign-in
+    // This prevents client-side hangs where a background POST request is redirected to HTML
+    if (request.method !== "GET") {
+      const session = await auth();
+      if (!session.userId) {
+        return new Response(JSON.stringify({ message: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+    }
     await auth.protect()
   }
 })

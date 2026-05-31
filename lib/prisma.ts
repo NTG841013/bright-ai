@@ -14,7 +14,12 @@ const createPrismaClient = () => {
     return new PrismaClient();
   } else {
     // Direct Postgres with adapter
-    const pool = new pg.Pool({ connectionString });
+    const pool = new pg.Pool({ 
+      connectionString,
+      ssl: {
+        rejectUnauthorized: false
+      }
+    });
     const adapter = new PrismaPg(pool);
     return new PrismaClient({ adapter });
   }

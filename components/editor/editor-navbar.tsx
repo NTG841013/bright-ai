@@ -6,10 +6,10 @@ import { UserButton } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { ShareDialog } from "./share-dialog"
 import { StarterTemplatesModal } from "./starter-templates-modal"
-import { useReactFlow } from "@xyflow/react"
-import { CanvasTemplate } from "./starter-templates"
 import { useCanvas } from "./canvas-context"
 import { cn } from "@/lib/utils"
+import { Logo } from "@/components/ui/logo"
+import Link from "next/link"
 
 interface EditorNavbarProps {
     isOpen: boolean
@@ -20,21 +20,11 @@ interface EditorNavbarProps {
     isOwner?: boolean
 }
 
-export function EditorNavbar({ isOpen, onToggle, projectId, projectName, onToggleAi, isOwner = false }: EditorNavbarProps) {
+export function EditorNavbar({ isOpen, onToggle, projectId, projectName, isOwner = false }: EditorNavbarProps) {
     const [isShareOpen, setIsShareOpen] = useState(false)
     const [isTemplatesOpen, setIsTemplatesOpen] = useState(false)
     const [mounted, setMounted] = useState(false)
-    const { setNodes, setEdges, fitView } = useReactFlow()
     const canvas = useCanvas()
-
-    const handleImportTemplate = (template: CanvasTemplate) => {
-        setNodes(template.nodes);
-        setEdges(template.edges);
-        // Small timeout to allow nodes to render before fitting view
-        setTimeout(() => {
-            fitView({ padding: 0.2, duration: 800 });
-        }, 50);
-    }
 
     useEffect(() => {
         setMounted(true)
@@ -50,6 +40,10 @@ export function EditorNavbar({ isOpen, onToggle, projectId, projectName, onToggl
                     )}
                     <span className="sr-only">Toggle sidebar</span>
                 </Button>
+
+                <Link href="/" className="flex shrink-0 items-center">
+                    <Logo iconOnly className="h-7 w-7" />
+                </Link>
 
                 {projectName ? (
                     <div className="min-w-0">
@@ -101,7 +95,7 @@ export function EditorNavbar({ isOpen, onToggle, projectId, projectName, onToggl
                         <Button 
                             variant="ghost" 
                             size="sm" 
-                            onClick={onToggleAi}
+                            onClick={() => canvas?.setAiSidebarOpen(!canvas.aiSidebarOpen)}
                             className="h-7 gap-2 border-[1.5px] border-accent-primary/20 bg-accent-primary-dim px-3 text-accent-primary hover:bg-accent-primary/20 hover:text-accent-primary"
                         >
                             <Sparkles className="h-3.5 w-3.5" />
@@ -110,7 +104,7 @@ export function EditorNavbar({ isOpen, onToggle, projectId, projectName, onToggl
                     </>
                 )}
                 {mounted ? (
-                    !canvas && <UserButton />
+                    !projectId && <UserButton />
                 ) : (
                     <div className="h-7 w-7 animate-pulse rounded-full bg-border-subtle" />
                 )}
@@ -127,7 +121,7 @@ export function EditorNavbar({ isOpen, onToggle, projectId, projectName, onToggl
                     <StarterTemplatesModal
                         open={isTemplatesOpen}
                         onOpenChange={setIsTemplatesOpen}
-                        onImport={handleImportTemplate}
+                        onImport={(template) => canvas?.importTemplate?.(template)}
                     />
                 </>
             )}

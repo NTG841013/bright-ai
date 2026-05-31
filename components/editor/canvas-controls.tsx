@@ -27,6 +27,9 @@ export function CanvasControls() {
   const { isMac } = usePlatform();
   const canvas = useCanvas();
   const saveStatus = canvas?.saveStatus;
+  const projectSidebarOpen = canvas?.projectSidebarOpen;
+
+  if (projectSidebarOpen) return null;
 
   const handleZoomIn = () => zoomIn({ duration: 300 });
   const handleZoomOut = () => zoomOut({ duration: 300 });
@@ -111,7 +114,7 @@ export function CanvasControls() {
                 >
                   <Redo2 className="h-4 w-4" />
                 </Button>} />
-              <TooltipContent side="top">Redo ({isMac ? "⌘Y" : "Ctrl+Y"})</TooltipContent>
+              <TooltipContent side="top">Redo ({isMac ? "⌘⇧Z" : "Ctrl+Y"})</TooltipContent>
             </Tooltip>
           </div>
 

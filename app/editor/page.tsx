@@ -1,15 +1,15 @@
+import { auth } from "@clerk/nextjs/server"
 import { EditorShell } from "@/components/editor/editor-shell"
 import { getProjects } from "@/lib/projects"
-import { getClerkIdentity } from "@/lib/project-access"
 import { redirect } from "next/navigation"
 
 export default async function EditorPage() {
-  const identity = await getClerkIdentity()
-  if (!identity) {
+  const { userId } = await auth()
+  if (!userId) {
     redirect("/sign-in")
   }
 
-  const { owned, shared } = await getProjects(identity)
+  const { owned, shared } = await getProjects()
 
   return <EditorShell ownedProjects={owned} sharedProjects={shared} />
 }

@@ -1,4 +1,5 @@
 import { Cpu, Users, FileCode } from "lucide-react"
+import { Logo } from "@/components/ui/logo"
 
 const features = [
   {
@@ -23,19 +24,7 @@ export function AuthLeftPanel() {
     <aside className="hidden lg:flex lg:w-1/2 flex-col bg-[var(--bg-surface)] border-r border-[var(--border-default)]">
       <div className="flex flex-col flex-1 px-16 py-12">
         {/* Logo */}
-        <div className="flex items-center gap-2.5">
-          <div className="h-7 w-7 rounded-lg bg-[var(--accent-primary)]" />
-          <span
-            className="text-base font-semibold tracking-tight"
-            style={{
-              fontFamily: "var(--font-geist-sans)",
-              color: "var(--text-primary)",
-              animation: "pulse-brand 2.8s ease-in-out infinite",
-            }}
-          >
-            Bright AI
-          </span>
-        </div>
+        <Logo />
 
         {/* Hero text */}
         <div className="mt-auto mb-auto pt-24 pb-16">

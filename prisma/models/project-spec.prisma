@@ -1,0 +1,10 @@
+model ProjectSpec {
+  id        String   @id @default(cuid())
+  projectId String   @map("project_id")
+  name      String   @default("Technical Specification")
+  filePath  String   @map("file_path")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([projectId])
+  @@map("project_specs")
+}

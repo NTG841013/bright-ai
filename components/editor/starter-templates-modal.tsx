@@ -29,7 +29,7 @@ export function StarterTemplatesModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="max-w-[1400px] w-[95vw] lg:w-[98vw] max-h-[95vh] flex flex-col p-0 gap-0 overflow-hidden border-border-subtle bg-[#111113] rounded-3xl"
+        className="sm:max-w-[1400px] w-[95vw] lg:w-[98vw] max-h-[95vh] flex flex-col p-0 gap-0 overflow-hidden border-border-subtle bg-[#111113] rounded-3xl"
         showCloseButton={false}
       >
         <DialogHeader className="p-8 pb-4">
