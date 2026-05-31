@@ -41,6 +41,11 @@ export async function POST(request: NextRequest) {
 
   // 4. Ensure the Liveblocks room exists (create if needed) using getOrCreateRoom for atomicity
   // We do this BEFORE preparing the session to ensure the room is there.
+  if (!liveblocks) {
+    console.error("LIVEBLOCKS_SECRET_KEY is missing");
+    return NextResponse.json({ message: "Liveblocks service unavailable" }, { status: 503 });
+  }
+
   try {
     await liveblocks.getOrCreateRoom(room, {
       defaultAccesses: [], // Private by default, managed by our auth route
@@ -51,7 +56,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const session = liveblocks.prepareSession(userId, {
+    const session = liveblocks!.prepareSession(userId, {
       userInfo: {
         name,
         avatar,
