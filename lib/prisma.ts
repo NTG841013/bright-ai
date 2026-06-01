@@ -3,13 +3,15 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 
 const createPrismaClient = () => {
-  const connectionString = process.env.DATABASE_URL;
+  // Check for DATABASE_URL first (used by Next.js and synced to Trigger)
+  // Fall back to DIRECT_URL (Trigger's default for direct connections)
+  const connectionString = process.env.DATABASE_URL || process.env.DIRECT_URL;
 
   if (!connectionString) {
-    // DATABASE_URL is required for Prisma client initialization during build
+    // DATABASE_URL or DIRECT_URL is required for Prisma client initialization during build
     // Throwing here ensures `prisma` is always a PrismaClient and avoids
     // nullable types that cause TypeScript errors in routes that use `prisma`.
-    throw new Error("DATABASE_URL is not set");
+    throw new Error("DATABASE_URL or DIRECT_URL is not set");
   }
 
   if (connectionString.startsWith("prisma+postgres://")) {
