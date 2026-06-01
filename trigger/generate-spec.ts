@@ -294,7 +294,16 @@ Please generate the full technical specification now.`,
       if (!prisma) {
         throw new Error("DATABASE_URL is required for this task");
       }
-      await prisma!.projectSpec.create({
+
+      // Defensive check: ensure the generated Prisma client includes the
+      // `projectSpec` delegate. If this is missing the Prisma client is
+      // misconfigured or the model was not present at client generation time.
+      if (typeof prisma.projectSpec?.create !== "function") {
+        console.error("Prisma client missing 'projectSpec' delegate", { prismaKeys: Object.keys(prisma) });
+        throw new Error("Prisma client is not configured with ProjectSpec model (prisma.projectSpec.create is missing)");
+      }
+
+      await prisma.projectSpec.create({
         data: {
           id: specId,
           projectId: validated.projectId,
