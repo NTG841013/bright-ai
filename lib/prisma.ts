@@ -6,10 +6,10 @@ const createPrismaClient = () => {
   const connectionString = process.env.DATABASE_URL;
 
   if (!connectionString) {
-    if (process.env.NODE_ENV === "production" && !process.env.TRIGGER_PROJECT_REF) {
-      throw new Error("DATABASE_URL is not set");
-    }
-    return null;
+    // DATABASE_URL is required for Prisma client initialization during build
+    // Throwing here ensures `prisma` is always a PrismaClient and avoids
+    // nullable types that cause TypeScript errors in routes that use `prisma`.
+    throw new Error("DATABASE_URL is not set");
   }
 
   if (connectionString.startsWith("prisma+postgres://")) {
