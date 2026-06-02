@@ -3,20 +3,19 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 
 const createPrismaClient = () => {
-  const connectionString = process.env.DATABASE_URL;
+  const connectionString = process.env.DATABASE_URL || process.env.DIRECT_URL;
 
   if (!connectionString) {
-    if (process.env.NODE_ENV === "production" && !process.env.TRIGGER_PROJECT_REF) {
-      throw new Error("DATABASE_URL is not set");
-    }
-    return null;
+    // DATABASE_URL or DIRECT_URL is required for Prisma client initialization.
+    // Throwing here ensures `prisma` is always a PrismaClient and avoids
+    // nullable types that cause TypeScript errors in routes that use `prisma`.
+    throw new Error("DATABASE_URL or DIRECT_URL is not set");
   }
 
   if (connectionString.startsWith("prisma+postgres://")) {
-    // Prisma Accelerate — pass URL via datasourceUrl
-    return new PrismaClient({
-      datasourceUrl: connectionString,
-    });
+    // Prisma Accelerate — set DATABASE_URL for the client and construct normally
+    process.env.DATABASE_URL = connectionString;
+    return new PrismaClient();
   } else {
     // Direct Postgres via adapter
     const pool = new pg.Pool({
@@ -43,5 +42,6 @@ export const requirePrisma = () => {
 
 export const isPrismaNotFound = (error: unknown): boolean => {
   const { Prisma } = require("@prisma/client");
-  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025";
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) return false;
+  return (error as any).code === "P2025";
 };
